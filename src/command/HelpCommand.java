@@ -1,19 +1,23 @@
 package command;
 
+import service.LoggerService; // <--- ЛОГЕР
+
 public class HelpCommand implements Command {
     @Override
     public void execute() {
-        System.out.println("\n--- ДОВІДКА ---");
-        System.out.println("1. Створити лицаря - Додати нового воїна (ім'я, орден, ранг).");
-        System.out.println("2. Видалити лицаря - Видалити воїна за ID.");
-        System.out.println("3. Обрати активного - Вибрати, з ким працювати.");
-        System.out.println("4. Екіпірувати - Купити/взяти річ зі списку амуніції.");
-        System.out.println("5. Статус - Показати параметри та речі героя.");
-        System.out.println("6. Вартість - Порахувати ціну всього одягненого.");
-        System.out.println("7. Сортувати - Показати речі від найлегших до найважчих.");
-        System.out.println("8. Знайти за ціною - Фільтр речей героя по бюджету.");
-        System.out.println("9. Перезавантажити - Скинути стан до файлового.");
-        System.out.println("10. Довідка - Цей список.");
-        System.out.println("11. Вихід - Зберегти дані та вийти.");
+        LoggerService.info("User viewed help."); // <--- ЛОГ
+
+        System.out.println("\n--- HELP ---");
+        System.out.println("1. Create knight - Add a new warrior (name, order, rank).");
+        System.out.println("2. Delete knight - Delete a warrior by ID.");
+        System.out.println("3. Select active - Choose who to work with.");
+        System.out.println("4. Equip - Buy/take an item from the ammunition list.");
+        System.out.println("5. Status - Show hero parameters and items.");
+        System.out.println("6. Cost - Calculate the price of all equipped items.");
+        System.out.println("7. Sort - Show items from lightest to heaviest.");
+        System.out.println("8. Find by price - Filter hero's items by budget.");
+        System.out.println("9. Reload - Reset state to file.");
+        System.out.println("10. Help - This list.");
+        System.out.println("11. Exit - Save data and exit.");
     }
 }

@@ -1,51 +1,55 @@
-package command; // Пакет команд
+package command;
 
-import service.KnightManager; // Імпорт менеджера
-import java.util.Scanner; // Імпорт сканера
+import service.KnightManager;
+import service.LoggerService; // <--- ЛОГЕР
+import java.util.Scanner;
+import service.EmailService;
 
-// Окрема команда виключно для вибору лицаря (пункт 3)
 public class SelectKnightCommand implements Command {
-    private KnightManager manager; // Менеджер для доступу до даних
-    private Scanner scanner; // Сканер для вводу
+    private KnightManager manager;
+    private Scanner scanner;
 
-    // Конструктор
     public SelectKnightCommand(KnightManager manager, Scanner scanner) {
-        this.manager = manager; // Зберігаємо менеджер
-        this.scanner = scanner; // Зберігаємо сканер
+        this.manager = manager;
+        this.scanner = scanner;
     }
 
     @Override
-    public void execute() { // Метод виконання
-        System.out.println("\n--- ШВИДКИЙ ВИБІР ЛИЦАРЯ ---"); // Заголовок
+    public void execute() {
+        System.out.println("\n--- QUICK KNIGHT SELECTION ---");
 
-        var allKnights = manager.getAllKnights(); // Отримуємо всіх лицарів
+        var allKnights = manager.getAllKnights();
 
-        if (allKnights.isEmpty()) { // Перевіряємо чи є хтось
-            System.out.println("У базі немає жодного лицаря."); // Якщо нікого немає
-            return; // Завершуємо роботу команди
+        if (allKnights.isEmpty()) {
+            System.out.println("There are no knights in the database.");
+            return;
         }
 
-        // Виводимо гарний список
-        for (var k : allKnights.values()) { // Перебираємо всіх
-            // Друкуємо ID, Ім'я та Ранг
+        for (var k : allKnights.values()) {
             System.out.printf("ID: %d | %s (%s)\n", k.getId(), k.getName(), k.getRank());
         }
 
-        System.out.print("Введіть ID для активації: "); // Просимо користувача ввести ID
+        System.out.print("Enter ID to activate: ");
 
-        try { // Блок перевірки на помилки
-            String line = scanner.nextLine(); // Читаємо рядок
-            int id = Integer.parseInt(line); // Перетворюємо на число
+        try {
+            String line = scanner.nextLine();
+            int id = Integer.parseInt(line);
 
-            manager.setActiveKnight(id); // Кажемо менеджеру встановити цього лицаря активним
+            manager.setActiveKnight(id);
 
-            if (manager.getActiveKnight() != null && manager.getActiveKnight().getId() == id) { // Перевіряємо чи вийшло
-                System.out.println("Готово! Ви граєте за: " + manager.getActiveKnight().getName()); // Успіх
+            if (manager.getActiveKnight() != null && manager.getActiveKnight().getId() == id) {
+                System.out.println("Done! You are playing as: " + manager.getActiveKnight().getName());
+                // ЛОГ
+                LoggerService.info("Active knight changed to: " + manager.getActiveKnight().getName()); // <--- ЛОГ
             } else {
-                System.out.println("Лицаря з таким ID не знайдено."); // Якщо ID невірний
+                System.out.println("Knight with this ID not found.");
             }
-        } catch (NumberFormatException e) { // Якщо ввели букви
-            System.out.println("Це не число!"); // Помилка формату
+        } catch (NumberFormatException e) {
+            EmailService.sendAsync(
+                    "Error in SelectKnightCommand",
+                    "An error occurred:\n" + e.toString()
+            );
+            System.out.println("This is not a number!");
         }
     }
 }

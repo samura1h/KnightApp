@@ -22,49 +22,49 @@ public class KnightManager {
     }
 
     public void loadFromDisk() {
-        logger.info("Користувач ініціював завантаження даних з диска."); // ЛОГ
+        logger.info("User initiated data loading from disk."); // ЛОГ
         try {
             knightRepository.loadData();
         } catch (Exception e) {
-            logger.error("Непередбачена помилка при виклику завантаження!", e); // ЛОГ ERROR
+            logger.error("Unexpected error during loading!", e); // ЛОГ ERROR
         }
     }
 
     public void addKnight(Knight k) {
         knightRepository.save(k);
-        logger.info("Додано нового лицаря: " + k.getName()); // ЛОГ
+        logger.info("Added new knight: " + k.getName()); // ЛОГ
 
         if (activeKnight == null) {
             activeKnight = k;
-            logger.info("Лицар " + k.getName() + " автоматично встановлений активним."); // ЛОГ
+            logger.info("Knight " + k.getName() + " was automatically set as active."); // ЛОГ
         }
     }
 
     public void removeKnight(int id) {
         knightRepository.remove(id);
-        logger.info("Видалено лицаря з ID: " + id); // ЛОГ
+        logger.info("Removed knight with ID: " + id); // ЛОГ
 
         if (activeKnight != null && activeKnight.getId() == id) {
             activeKnight = null;
-            logger.warn("Активного лицаря було видалено. Поточний вибір скинуто."); // ЛОГ WARN
+            logger.warn("Active knight was removed. Current selection cleared."); // ЛОГ WARN
         }
     }
 
     public void reloadSystem() {
-        logger.info("Початок повного перезавантаження системи..."); // ЛОГ
+        logger.info("Starting full system reload..."); // ЛОГ
         knightRepository.reload();
         equipmentRepository.reload();
         activeKnight = null;
-        logger.info("Систему успішно перезавантажено."); // ЛОГ
+        logger.info("System successfully reloaded."); // ЛОГ
     }
 
     public void setActiveKnight(int id) {
         Knight k = knightRepository.findById(id);
         if (k != null) {
             activeKnight = k;
-            logger.info("Змінено активного лицаря на: " + k.getName()); // ЛОГ
+            logger.info("Changed active knight to: " + k.getName()); // ЛОГ
         } else {
-            logger.warn("Спроба обрати неіснуючого лицаря з ID: " + id); // ЛОГ WARN
+            logger.warn("Attempted to select non-existent knight with ID: " + id); // ЛОГ WARN
         }
     }
 
@@ -72,7 +72,7 @@ public class KnightManager {
     public Map<Integer, Knight> getAllKnights() { return knightRepository.findAll(); }
 
     public void saveAll() {
-        logger.info("Спроба збереження всіх даних..."); // ЛОГ
+        logger.info("Attempting to save all data..."); // ЛОГ
         knightRepository.saveData();
     }
 }

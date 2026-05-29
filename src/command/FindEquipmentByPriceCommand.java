@@ -1,18 +1,18 @@
-package command; // Пакет
+package command;
 
-import model.equipment.Ammunition; // Модель
-import repository.EquipmentRepository; // Репозиторій
-import service.KnightManager; // Менеджер
-import java.util.List; // Список
-import java.util.Scanner; // Сканер
+import model.equipment.Ammunition;
+import repository.EquipmentRepository;
+import service.KnightManager;
+import service.LoggerService; // <--- ЛОГЕР
+import java.util.List;
+import java.util.Scanner;
+import service.EmailService;
 
-// Команда пошуку за ціною (Пункт 8)
 public class FindEquipmentByPriceCommand implements Command {
-    private KnightManager km; // Менеджер
-    private EquipmentRepository repo; // Репозиторій
-    private Scanner scanner; // Сканер
+    private KnightManager km;
+    private EquipmentRepository repo;
+    private Scanner scanner;
 
-    // Оновили конструктор: додали репозиторій
     public FindEquipmentByPriceCommand(KnightManager km, EquipmentRepository repo, Scanner scanner) {
         this.km = km;
         this.repo = repo;
@@ -21,47 +21,57 @@ public class FindEquipmentByPriceCommand implements Command {
 
     @Override
     public void execute() {
-        System.out.println("\n--- Пошук за ціною ---"); // Заголовок
-        System.out.println("1. Шукати в інвентарі лицаря"); // Опція 1
-        System.out.println("2. Шукати в каталозі магазину"); // Опція 2
-        System.out.print("Ваш вибір: "); // Ввід
+        System.out.println("\n--- Search by Price ---");
+        System.out.println("1. Search in knight's inventory");
+        System.out.println("2. Search in shop catalog");
+        System.out.print("Your choice: ");
 
-        String choice = scanner.nextLine(); // Читання
-        List<Ammunition> searchList = null; // Де шукаємо
+        String choice = scanner.nextLine();
+        List<Ammunition> searchList = null;
 
-        if (choice.equals("1")) { // Лицар
+        if (choice.equals("1")) {
             if (km.getActiveKnight() == null) {
-                System.out.println("ПОМИЛКА: Лицар не обраний.");
+                System.out.println("ERROR: Knight is not selected.");
                 return;
             }
             searchList = km.getActiveKnight().getEquipment();
-        } else if (choice.equals("2")) { // Каталог
+        } else if (choice.equals("2")) {
             searchList = repo.getAll();
         } else {
-            System.out.println("Невірний вибір.");
+            System.out.println("Invalid choice.");
             return;
         }
 
         try {
-            System.out.print("Введіть мінімальну ціну: "); // Мін
+            System.out.print("Enter minimum price: ");
             double min = Double.parseDouble(scanner.nextLine());
-            System.out.print("Введіть максимальну ціну: "); // Макс
+            System.out.print("Enter maximum price: ");
             double max = Double.parseDouble(scanner.nextLine());
 
-            System.out.println("--- Знайдені предмети ---");
-            boolean found = false; // Прапорець
+            // ЛОГ ПОШУКУ
+            LoggerService.info("Searching for items in price range: " + min + " - " + max); // <--- ЛОГ
 
-            for (Ammunition item : searchList) { // Перебір
-                if (item.getPrice() >= min && item.getPrice() <= max) { // Умова
-                    System.out.println(item); // Вивід
+            System.out.println("--- Found Items ---");
+            boolean found = false;
+
+            for (Ammunition item : searchList) {
+                if (item.getPrice() >= min && item.getPrice() <= max) {
+                    System.out.println(item);
                     found = true;
                 }
             }
 
-            if (!found) System.out.println("Нічого не знайдено."); // Якщо пусто
+            if (!found) {
+                System.out.println("Nothing found.");
+                LoggerService.info("Search yielded no results."); // <--- ЛОГ
+            }
 
         } catch (NumberFormatException e) {
-            System.out.println("Помилка: введіть число.");
+            EmailService.sendAsync(
+                    "Error in FindEquipmentByPriceCommand",
+                    "An error occurred:\n" + e.toString()
+            );
+            System.out.println("Error: please enter a number.");
         }
     }
 }

@@ -1,12 +1,10 @@
 package model.equipment; // Вказуємо, що цей клас знаходиться в пакеті model.equipment
 
-import java.io.Serializable; // Імпортуємо інтерфейс, який дозволяє зберігати об'єкти цього класу у файл (серіалізація)
-
 // Оголошуємо абстрактний клас Ammunition.
 // 'abstract' означає, що ми не можемо створити об'єкт new Ammunition(), тільки конкретні (наприклад, Sword).
 // 'implements Comparable' дозволяє сортувати об'єкти.
-// 'implements Serializable' дозволяє записувати об'єкти на диск.
-public abstract class Ammunition implements Comparable<Ammunition>, Serializable {
+public abstract class Ammunition implements Comparable<Ammunition> {
+    private int catalogId; // ID запису в таблиці equipment_catalog (SQLite)
     private String name;   // Приватне поле для зберігання назви предмету
     private double weight; // Приватне поле для ваги (використовуємо double для дробових чисел)
     private double price;  // Приватне поле для ціни
@@ -18,8 +16,10 @@ public abstract class Ammunition implements Comparable<Ammunition>, Serializable
         this.price = price;   // Записуємо передану ціну
     }
 
-    // --- Геттери (методи доступу до приватних полів ззовні) ---
+    // --- Геттери та сеттери (методи доступу до приватних полів ззовні) ---
 
+    public int getCatalogId() { return catalogId; } // Повертає ID каталогу в БД
+    public void setCatalogId(int catalogId) { this.catalogId = catalogId; } // Встановлює ID каталогу в БД
     public String getName() { return name; } // Повертає назву
     public double getWeight() { return weight; } // Повертає вагу
     public double getPrice() { return price; } // Повертає ціну
@@ -43,6 +43,6 @@ public abstract class Ammunition implements Comparable<Ammunition>, Serializable
         // String.format форматує рядок:
         // %-20s - рядок (назва), займає 20 символів, вирівнювання ліворуч
         // %.1f - дробове число з 1 знаком після коми
-        return String.format("%-20s (Вага: %.1fкг, Ціна: %.1f$)", name, weight, price);
+        return String.format("%-20s (Weight: %.1fkg, Price: $%.1f)", name, weight, price);
     }
 }

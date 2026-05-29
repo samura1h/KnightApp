@@ -1,96 +1,110 @@
-package command; // Пакет для команд
+package command;
 
-import model.Knight; // Імпорт моделі Лицаря
-import model.Rank; // Імпорт рангу
-import service.KnightManager; // Імпорт менеджера
-import java.util.Scanner; // Імпорт сканера
+import model.Knight;
+import model.Rank;
+import service.EmailService;
+import service.KnightManager;
+import service.LoggerService; // <--- ЛОГЕР
+import java.util.Scanner;
 
-// Клас команди для Пункту 1: Створити або Завантажити
 public class CreateOrLoadKnightCommand implements Command {
-    private KnightManager manager; // Поле для менеджера (бізнес-логіка)
-    private Scanner scanner; // Поле для зчитування вводу
-    // Конструктор класу
+    private KnightManager manager;
+    private Scanner scanner;
+
     public CreateOrLoadKnightCommand(KnightManager manager, Scanner scanner) {
-        this.manager = manager; // Ініціалізуємо менеджер
-        this.scanner = scanner; // Ініціалізуємо сканер
+        this.manager = manager;
+        this.scanner = scanner;
     }
+
     @Override
-    public void execute() { // Метод виконання команди
-        System.out.println("\n--- МЕНЮ: СТВОРИТИ АБО ЗАВАНТАЖИТИ ---"); // Заголовок
-        System.out.println("1. Створити нового лицаря"); // Варіант 1
-        System.out.println("2. Завантажити існуючого"); // Варіант 2
-        System.out.print("Ваш вибір: "); // Питаємо користувача
+    public void execute() {
+        System.out.println("\n--- MENU: CREATE OR LOAD ---");
+        System.out.println("1. Create a new knight");
+        System.out.println("2. Load an existing one");
+        System.out.print("Your choice: ");
 
-        String choice = scanner.nextLine(); // Читаємо вибір
+        String choice = scanner.nextLine();
 
-        if (choice.equals("1")) { // Якщо обрали 1
-            createProcess(); // Запускаємо процес створення
-        } else if (choice.equals("2")) { // Якщо обрали 2
-            loadProcess(); // Запускаємо процес завантаження
-        } else { // Якщо ввели щось інше
-            System.out.println("Невірний вибір."); // Повідомляємо про помилку
+        if (choice.equals("1")) {
+            createProcess();
+        } else if (choice.equals("2")) {
+            loadProcess();
+        } else {
+            System.out.println("Invalid choice.");
         }
     }
-    // --- ПРИВАТНИЙ МЕТОД: СТВОРЕННЯ ---
+
     private void createProcess() {
-        System.out.println(">>> Створення нового лицаря"); // Інформаційне повідомлення
-        System.out.print("Ім'я: "); // Питаємо ім'я
-        String name = scanner.nextLine(); // Читаємо ім'я
-        System.out.print("Орден: "); // Питаємо орден
-        String orden = scanner.nextLine(); // Читаємо орден
+        System.out.println(">>> Creating a new knight");
+        System.out.print("Name: ");
+        String name = scanner.nextLine();
+        System.out.print("Order: ");
+        String orden = scanner.nextLine();
 
-        Rank rank = Rank.NOVICE; // Ранг за замовчуванням
-        System.out.print("Ранг (1-Novice, 2-Veteran, 3-Master): "); // Питаємо ранг
-        try { // Блок обробки помилок (якщо введуть не число)
-            int r = Integer.parseInt(scanner.nextLine()); // Читаємо число
-            if (r == 2) rank = Rank.VETERAN; // Якщо 2 - Ветеран
-            if (r == 3) rank = Rank.MASTER; // Якщо 3 - Майстер
-        } catch (Exception e) {} // Ігноруємо помилки
+        Rank rank = Rank.NOVICE;
+        System.out.print("Rank (1-Novice, 2-Veteran, 3-Master, 4-Grand Master): ");
+        try {
+            int r = Integer.parseInt(scanner.nextLine());
+            if (r == 2) rank = Rank.VETERAN;
+            if (r == 3) rank = Rank.MASTER;
+            if (r == 4) rank = Rank.GRAND_MASTER;
+        } catch (Exception e) {
+            // Ігнор
+        }
 
-        Knight k = new Knight(name, orden, rank); // Створюємо об'єкт лицаря
-        manager.addKnight(k); // Додаємо його в систему через менеджер
-        System.out.println("Лицар успішно створений!"); // Повідомляємо про успіх
+        Knight k = new Knight(name, orden, rank);
+        manager.addKnight(k);
+        System.out.println("Knight successfully created!");
+
+        // ЛОГ: Успішне створення
+        LoggerService.info("Created a new knight: " + name + " (Order: " + orden + ", Rank: " + rank + ")"); // <--- ЛОГ
     }
-    // --- ПРИВАТНИЙ МЕТОД: ЗАВАНТАЖЕННЯ (LOAD) ---
-    private void loadProcess() {
-        // Перевіряємо, чи список в пам'яті пустий
-        if (manager.getAllKnights().isEmpty()) {
-            System.out.println("Список лицарів в пам'яті пустий."); // Повідомляємо
-            // Питаємо, чи підвантажити файл
-            System.out.print("Завантажити дані з файлу (knights.txt)? (y/n): ");
-            String ans = scanner.nextLine(); // Читаємо відповідь
 
-            if (ans.equalsIgnoreCase("y")) { // Якщо 'y'
-                manager.loadFromDisk(); // Кажемо менеджеру завантажити з диску
-            } else { // Якщо 'n' або інше
-                System.out.println("Скасовано."); // Скасовуємо
-                return; // Виходимо
+    private void loadProcess() {
+        if (manager.getAllKnights().isEmpty()) {
+            System.out.println("Knight list in memory is empty.");
+            System.out.print("Load data from file (knights.txt)? (y/n): ");
+            String ans = scanner.nextLine();
+
+            if (ans.equalsIgnoreCase("y")) {
+                manager.loadFromDisk();
+                LoggerService.info("User initiated loading from disk."); // <--- ЛОГ
+            } else {
+                return;
             }
         }
-        // Беремо список знову (раптом він заповнився після завантаження)
+
         var all = manager.getAllKnights();
-        if (all.isEmpty()) { // Якщо все одно пустий
-            System.out.println("Немає кого завантажувати."); // Кажемо про це
-            return; // Виходимо
+        if (all.isEmpty()) {
+            System.out.println("No knights to load.");
+            return;
         }
-        // Виводимо список доступних
-        System.out.println("--- Список збережених лицарів ---");
-        for (Knight k : all.values()) { // Перебираємо всіх
-            // Виводимо ID, Ім'я та Ранг (метод getRank() вже має бути в моделі)
+
+        System.out.println("--- List of saved knights ---");
+        for (Knight k : all.values()) {
             System.out.println("ID: " + k.getId() + " | " + k.getName() + " | " + k.getRank());
         }
-        System.out.print("Введіть ID для вибору: "); // Просимо ID
+        System.out.print("Enter ID to select: ");
         try {
-            int id = Integer.parseInt(scanner.nextLine()); // Читаємо ID
-            manager.setActiveKnight(id); // Встановлюємо активного
-            // Перевіряємо результат
+            int id = Integer.parseInt(scanner.nextLine());
+            manager.setActiveKnight(id);
+
             if (manager.getActiveKnight() != null) {
-                System.out.println("Лицар обраний: " + manager.getActiveKnight().getName()); // Успіх
+                System.out.println("Knight selected: " + manager.getActiveKnight().getName());
+                // ЛОГ: Успішний вибір
+                LoggerService.info("Loaded/Selected knight ID: " + id + " Name: " + manager.getActiveKnight().getName()); // <--- ЛОГ
             } else {
-                System.out.println("ID не знайдено."); // Помилка
+                System.out.println("ID not found.");
+                LoggerService.info("Failed attempt to load knight: ID " + id + " not found"); // <--- ЛОГ
             }
-        } catch (Exception e) { // Якщо ввели букви
-            System.out.println("Помилка вводу."); // Помилка
+
+        } catch (Exception e) {
+            System.out.println("Input error.");
+            EmailService.sendAsync(
+                    "Error in CreateOrLoadKnightCommand",
+                    "An error occurred:\n" + e.toString()
+            );
+            LoggerService.error("ID input error during loading: " + e.getMessage()); // <--- ЛОГ
         }
     }
 }

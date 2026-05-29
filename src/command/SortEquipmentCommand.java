@@ -1,20 +1,19 @@
-package command; // Пакет
+package command;
 
-import model.equipment.Ammunition; // Модель
-import repository.EquipmentRepository; // Репозиторій
-import service.KnightManager; // Менеджер
-import java.util.ArrayList; // АрайЛіст (для копіювання)
-import java.util.Collections; // Колекції (для сортування)
-import java.util.List; // Інтерфейс списку
-import java.util.Scanner; // Сканер
+import model.equipment.Ammunition;
+import repository.EquipmentRepository;
+import service.KnightManager;
+import service.LoggerService; // <--- ЛОГЕР
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Scanner;
 
-// Команда сортування (Пункт 7)
 public class SortEquipmentCommand implements Command {
-    private KnightManager km; // Менеджер
-    private EquipmentRepository repo; // Репозиторій
-    private Scanner scanner; // Сканер
+    private KnightManager km;
+    private EquipmentRepository repo;
+    private Scanner scanner;
 
-    // Оновили конструктор: додали репозиторій та сканер
     public SortEquipmentCommand(KnightManager km, EquipmentRepository repo, Scanner scanner) {
         this.km = km;
         this.repo = repo;
@@ -23,37 +22,43 @@ public class SortEquipmentCommand implements Command {
 
     @Override
     public void execute() {
-        System.out.println("\n--- Сортування амуніції за вагою ---"); // Заголовок
-        System.out.println("1. Сортувати інвентар активного лицаря"); // Опція 1
-        System.out.println("2. Сортувати загальний каталог"); // Опція 2
-        System.out.print("Ваш вибір: "); // Ввід
+        System.out.println("\n--- Sort Ammunition by Weight ---");
+        System.out.println("1. Sort active knight's inventory");
+        System.out.println("2. Sort general catalog");
+        System.out.print("Your choice: ");
 
-        String choice = scanner.nextLine(); // Читання
-        List<Ammunition> listToSort = null; // Список для сортування
+        String choice = scanner.nextLine();
+        List<Ammunition> listToSort = null;
+        String context = ""; // Для логу (що ми сортуємо)
 
         if (choice.equals("1")) { // Лицар
             if (km.getActiveKnight() == null) {
-                System.out.println("ПОМИЛКА: Лицар не обраний.");
+                System.out.println("ERROR: Knight is not selected.");
+                LoggerService.info("Failed sort attempt: knight not selected."); // <--- ЛОГ
                 return;
             }
-            // Беремо реальний список лицаря (сортування змінить порядок у нього в кишені)
             listToSort = km.getActiveKnight().getEquipment();
+            context = "inventory of knight " + km.getActiveKnight().getName();
         } else if (choice.equals("2")) { // Каталог
-            // ВАЖЛИВО: Робимо копію каталогу (new ArrayList), щоб не поламати порядок ID для магазину
             listToSort = new ArrayList<>(repo.getAll());
+            context = "general shop catalog";
         } else {
-            System.out.println("Невірний вибір.");
+            System.out.println("Invalid choice.");
             return;
         }
 
         if (listToSort.isEmpty()) {
-            System.out.println("Список порожній.");
+            System.out.println("The list is empty.");
+            LoggerService.info("Attempted to sort an empty list (" + context + ")."); // <--- ЛОГ
             return;
         }
 
-        Collections.sort(listToSort); // Сортуємо (використовує compareTo в Ammunition)
+        Collections.sort(listToSort); // Сортуємо
 
-        System.out.println("--- Результат сортування (від легшого до важчого) ---");
-        listToSort.forEach(System.out::println); // Виводимо
+        System.out.println("--- Sort Result (from lightest to heaviest) ---");
+        listToSort.forEach(System.out::println);
+
+        // ЛОГ: Успішне сортування
+        LoggerService.info("Sorted " + context); // <--- ЛОГ
     }
 }

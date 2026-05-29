@@ -5,8 +5,19 @@ package model;
  * Використовується для обмеження можливих значень (не можна ввести неіснуючий ранг).
  */
 public enum Rank {
-    NOVICE,     // Новачок
-    VETERAN,    // Ветеран
-    MASTER,     // Майстер
-    GRAND_MASTER // Гросмейстер (Магістр)
+    NOVICE("Novice"),     // Новачок
+    VETERAN("Veteran"),    // Ветеран
+    MASTER("Master"),     // Майстер
+    GRAND_MASTER("Grand Master"); // Гросмейстер
+
+    private final String displayName;
+
+    Rank(String displayName) {
+        this.displayName = displayName;
+    }
+
+    @Override
+    public String toString() {
+        return displayName;
+    }
 }

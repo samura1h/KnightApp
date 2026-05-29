@@ -1,45 +1,53 @@
-package command; // Вказуємо, що цей клас знаходиться в пакеті command
+package command;
 
-import service.KnightManager; // Імпортуємо клас KnightManager для доступу до логіки управління лицарями
-import java.util.Scanner; // Імпортуємо Scanner для зчитування вводу користувача з консолі
+import service.KnightManager;
+import service.LoggerService; // <--- ЛОГЕР
+import java.util.Scanner;
+import service.EmailService;
 
-// Клас реалізує інтерфейс Command і відповідає за видалення лицаря
 public class DeleteKnightCommand implements Command {
-    private KnightManager manager; // Поле для зберігання посилання на менеджер лицарів
-    private Scanner scanner; // Поле для зберігання посилання на сканер
+    private KnightManager manager;
+    private Scanner scanner;
 
-    // Конструктор класу, який приймає залежності (manager та scanner)
     public DeleteKnightCommand(KnightManager manager, Scanner scanner) {
-        this.manager = manager; // Ініціалізуємо поле manager переданим об'єктом
-        this.scanner = scanner; // Ініціалізуємо поле scanner переданим об'єктом
+        this.manager = manager;
+        this.scanner = scanner;
     }
 
-    @Override // Вказуємо, що переписуємо метод інтерфейсу Command
-    public void execute() { // Метод, який запускається при виборі цього пункту меню
-        var all = manager.getAllKnights(); // Отримуємо список (Map) усіх лицарів з менеджера
+    @Override
+    public void execute() {
+        var all = manager.getAllKnights();
 
-        if (all.isEmpty()) { // Перевіряємо, чи список лицарів порожній
-            System.out.println("Список лицарів порожній."); // Виводимо повідомлення, якщо нікого немає
-            return; // Завершуємо виконання методу, бо видаляти нікого
+        if (all.isEmpty()) {
+            System.out.println("The list of knights is empty.");
+            return;
         }
 
-        System.out.println("--- Видалення Лицаря ---"); // Виводимо заголовок меню
-        // Проходимось по всіх лицарях (values) і виводимо їх ID та Ім'я
+        System.out.println("--- Delete Knight ---");
         all.values().forEach(k -> System.out.println("ID: " + k.getId() + " | " + k.getName()));
 
-        System.out.print("Введіть номер (ID) лицаря для видалення: "); // Просимо користувача ввести ID
+        System.out.print("Enter the ID of the knight to delete: ");
 
-        try { // Починаємо блок try, щоб перехопити можливі помилки вводу (наприклад, літери замість цифр)
-            int id = Integer.parseInt(scanner.nextLine()); // Зчитуємо рядок і перетворюємо його в ціле число (int)
+        try {
+            int id = Integer.parseInt(scanner.nextLine());
 
-            if (all.containsKey(id)) { // Перевіряємо, чи існує лицар з таким ID у списку
-                manager.removeKnight(id); // Викликаємо метод менеджера для видалення лицаря за ID
-                System.out.println("Лицаря видалено."); // Повідомляємо про успішне видалення
-            } else { // Якщо лицаря з таким ID немає
-                System.out.println("Лицаря з таким ID не знайдено."); // Виводимо повідомлення про помилку
+            if (all.containsKey(id)) {
+                String deletedName = all.get(id).getName();
+                manager.removeKnight(id);
+                System.out.println("Knight deleted.");
+
+                // ЛОГ: Видалення
+                LoggerService.info("Deleted knight: ID " + id + ", Name: " + deletedName); // <--- ЛОГ
+            } else {
+                System.out.println("Knight with this ID not found.");
+                LoggerService.info("Attempted to delete non-existent ID: " + id); // <--- ЛОГ
             }
-        } catch (NumberFormatException e) { // Ловимо виключення, якщо користувач ввів не число
-            System.out.println("Помилка: введіть число."); // Просимо ввести коректні дані
+        } catch (NumberFormatException e) {
+            EmailService.sendAsync(
+                    "Error in DeleteKnightCommand",
+                    "An error occurred:\n" + e.toString()
+            );
+            System.out.println("Error: please enter a number.");
         }
     }
 }

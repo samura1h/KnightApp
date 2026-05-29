@@ -11,13 +11,16 @@ public abstract class Weapon extends Ammunition {
         super(name, weight, price); // Передаємо загальні параметри батьківському класу
         this.damage = damage;
     }
-    // Геттер для отримання шкоди
-    public int getDamage() {
-        return damage;
+
+    public int getDamage() { return damage; }
+
+    @Override
+    public double getPrice() {
+        return super.getPrice();
     }
-    // Перевизначаємо toString, щоб додавати інформацію про шкоду до загального опису
+
     @Override
     public String toString() {
-        return super.toString() + " | Шкода: +" + damage;
+        return super.toString() + " | Damage: +" + damage;
     }
 }

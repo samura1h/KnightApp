@@ -1,52 +1,55 @@
-Knife,Крем'яний Ніж,0.15,1.0,1
-Spear,Загострений Кілок,0.90,2.0,3
-Mace,Дубина з сучками,1.50,3.0,5
-Breastplate,Лляна Туніка,0.40,5.0,1
-Knife,Господарський Ніж,0.20,8.0,4
-Helmet,Повстяна Шапка,0.30,6.0,2
-Spear,Вила Селянські,1.80,12.0,8
-Axe,Сокира Дроворуба,1.50,15.0,10
-Bow,Короткий Лук,0.60,20.0,12
-Breastplate,Стьобанка (Гамбезон),2.50,40.0,8
-Sword,Тесак (Фальшіон),0.90,50.0,16
-Mace,Кий з цвяхами,1.80,35.0,14
-Helmet,Шкіряний Чепець,0.50,25.0,5
-Shield,Дерев'яний Баклер,1.20,30.0,6
-Spear,Спис Ополченця,2.00,45.0,18
-Knife,Сакс (Скрамасакс),0.60,60.0,15
-Axe,Франциска (Метальна),0.70,70.0,19
-Mace,Кістень (Ланцюговий),1.20,80.0,20
-Sword,Меч Каролінгів,1.20,120.0,25
-Breastplate,Шкіряна Бригантина,5.50,150.0,18
-Bow,Мисливський Лук,0.80,100.0,22
-Helmet,Норманський Шолом,1.60,110.0,14
-Spear,Вулж (Тесак на держаку),2.50,130.0,28
-Mace,Моргенштерн,1.80,160.0,30
-Axe,Бородата Сокира,1.40,140.0,32
-Breastplate,Кольчуга (Хауберк),11.00,300.0,25
-Sword,Романський Меч,1.30,250.0,30
-Shield,Трикутний Щит,3.00,180.0,20
-Helmet,Шапель (Капелина),2.00,200.0,18
-TwoHandedSword,Грос-Мессер,1.70,280.0,38
-Mace,Пернач (Шестопер),1.50,320.0,35
-Spear,Глефа,3.20,290.0,40
-Knife,Рондель (Пробивний),0.40,150.0,18
-Bow,Довгий Англійський Лук,1.10,350.0,35
-Breastplate,Пластинчаста Бригантина,9.00,500.0,35
-Sword,Бастардо (Полуторний),1.60,450.0,42
-Axe,Бойовий Чекан,1.30,380.0,38
-Helmet,Бацинет (Хундсгугель),2.80,550.0,30
-TwoHandedSword,Шотландський Клеймор,2.50,600.0,50
-Spear,Алебарда,3.50,520.0,55
-Mace,Бойовий Молот (Полекс),2.80,650.0,58
-Sword,Есток (Колючий),1.40,580.0,45
-Bow,Важкий Арбалет,5.00,700.0,60
-Breastplate,Корацина,10.00,800.0,45
-Helmet,Салад з забралом,2.50,750.0,35
-TwoHandedSword,Цвайхендер,3.80,900.0,65
-Axe,Бердиш Стрілецький,3.20,680.0,62
-Sword,Кацбальгер Ландскнехта,1.10,500.0,40
-Breastplate,Міланська Кіраса,14.00,1500.0,60
-Helmet,Армет (Закритий),3.50,1200.0,45
-TwoHandedSword,Фламберг (Хвилястий),3.40,1800.0,75
-Breastplate,Максиміліанівський Обладунок,22.00,3000.0,85
+Knife,Flint Knife,0.15,1.0,1
+Spear,Sharpened Stake,0.90,2.0,3
+Mace,Club with branches,1.50,3.0,5
+Breastplate,Linen Tunic,0.40,5.0,1
+Knife,Utility Knife,0.20,8.0,4
+Helmet,Felt Hat,0.30,6.0,2
+Spear,Peasant Pitchfork,1.80,12.0,8
+Axe,Woodcutter's Axe,1.50,15.0,10
+Bow,Short Bow,0.60,20.0,12
+Breastplate,Gambeson,2.50,40.0,8
+Sword,Falchion,0.90,50.0,16
+Mace,Spiked Club,1.80,35.0,14
+Helmet,Leather Cap,0.50,25.0,5
+Shield,Wooden Buckler,1.20,30.0,6
+Spear,Militia Spear,2.00,45.0,18
+Knife,Seax,0.60,60.0,15
+Axe,Francisca (Throwing Axe),0.70,70.0,19
+Mace,Flail,1.20,80.0,20
+Sword,Carolingian Sword,1.20,120.0,25
+Breastplate,Leather Brigandine,5.50,150.0,18
+Bow,Hunting Bow,0.80,100.0,22
+Helmet,Norman Helmet,1.60,110.0,14
+Spear,Voulge,2.50,130.0,28
+Mace,Morning Star,1.80,160.0,30
+Axe,Bearded Axe,1.40,140.0,32
+Breastplate,Chainmail (Hauberk),11.00,300.0,25
+Sword,Roman Sword,1.30,250.0,30
+Shield,Kite Shield,3.00,180.0,20
+Helmet,Chapel-de-fer (Kettle Hat),2.00,200.0,18
+TwoHandedSword,Gross Messer,1.70,280.0,38
+Mace,Pernach,1.50,320.0,35
+Spear,Glaive,3.20,290.0,40
+Knife,Rondel Dagger,0.40,150.0,18
+Bow,English Longbow,1.10,350.0,35
+Breastplate,Plated Brigandine,9.00,500.0,35
+Sword,Bastard Sword,1.60,450.0,42
+Axe,War Hammer,1.30,380.0,38
+Helmet,Bascinet (Hounskull),2.80,550.0,30
+TwoHandedSword,Scottish Claymore,2.50,600.0,50
+Spear,Halberd,3.50,520.0,55
+Mace,Poleaxe,2.80,650.0,58
+Sword,Estoc,1.40,580.0,45
+Bow,Heavy Crossbow,5.00,700.0,60
+Breastplate,Corazzina,10.00,800.0,45
+Helmet,Sallet with visor,2.50,750.0,35
+TwoHandedSword,Zweihander,3.80,900.0,65
+Axe,Bardiche,3.20,680.0,62
+Sword,Katzbalger,1.10,500.0,40
+Breastplate,Milanese Cuirass,14.00,1500.0,60
+Helmet,Armet (Closed),3.50,1200.0,45
+TwoHandedSword,Flamberge,3.40,1800.0,75
+Breastplate,Maximilian Armour,22.00,3000.0,85
+Greaves,Leather Greaves,1.20,35.0,4
+Greaves,Chainmail Leggings,4.50,120.0,12
+Greaves,Plate Greaves,6.00,300.0,20

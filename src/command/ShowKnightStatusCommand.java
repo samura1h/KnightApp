@@ -1,44 +1,41 @@
-package command; // Оголошення пакету, де знаходиться цей клас
+package command;
 
-import service.KnightManager; // Імпорт менеджера, щоб отримувати дані про активного лицаря
+import service.EmailService;
+import service.KnightManager;
+import service.LoggerService; // <--- ЛОГЕР
 
 /**
  * Команда, яка виводить повний статус активного лицаря.
- * Використовує метод toString() класу Knight.
  */
-public class ShowKnightStatusCommand implements Command { // Клас реалізує інтерфейс Command
-    private KnightManager km; // Поле для зберігання посилання на менеджер лицарів
+public class ShowKnightStatusCommand implements Command {
+    private KnightManager km;
 
-    // Конструктор класу. Отримуємо менеджер через конструктор, щоб знати, кого показувати
     public ShowKnightStatusCommand(KnightManager km) {
-        this.km = km; // Ініціалізуємо поле класу отриманим об'єктом менеджера
+        this.km = km;
     }
 
-    @Override // Вказуємо, що цей метод перевизначає метод з інтерфейсу
-    public void execute() { // Метод, який виконується при виборі пункту меню "Статус"
-
-        // Перевіряємо, чи взагалі обрано лицаря (чи не дорівнює activeKnight null)
+    @Override
+    public void execute() {
+        // Перевіряємо, чи взагалі обрано лицаря
         if (km.getActiveKnight() != null) {
-            System.out.println("\n--- СТАТУС ЛИЦАРЯ ---"); // Виводимо заголовок
-
-            // Виводимо об'єкт лицаря. Java автоматично викликає метод toString() у класу Knight,
-            // який повертає гарно відформатований рядок з ім'ям, здоров'ям, силою тощо.
+            System.out.println("\n--- KNIGHT STATUS ---");
             System.out.println(km.getActiveKnight());
 
-            // Додатково виводимо заголовок для списку речей
-            System.out.println("--- Список спорядження ---");
+            System.out.println("--- Equipment List ---");
 
-            // Перевіряємо, чи список екіпіровки порожній
             if (km.getActiveKnight().getEquipment().isEmpty()) {
-                System.out.println("(Порожньо)"); // Якщо речей немає, пишемо про це
+                System.out.println("(Empty)");
             } else {
-                // Якщо речі є, використовуємо forEach для проходу по списку
-                // System.out::println - це скорочений запис, який друкує кожен елемент списку (викликаючи у нього toString())
                 km.getActiveKnight().getEquipment().forEach(System.out::println);
             }
+
+            // ЛОГ: Успішний перегляд
+            LoggerService.info("Viewed knight status: " + km.getActiveKnight().getName()); // <--- ЛОГ
+
         } else {
-            // Якщо активного лицаря немає (змінна activeKnight == null)
-            System.out.println("ПОМИЛКА: Не обрано активного лицаря. Скористайтеся пунктом 2.");
+            System.out.println("ERROR: No active knight selected. Use option 3.");
+            // ЛОГ: Спроба перегляду без вибору
+            LoggerService.info("Attempted to view status without active knight."); // <--- ЛОГ
         }
     }
 }

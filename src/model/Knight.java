@@ -2,44 +2,58 @@ package model; // Пакет, у якому знаходиться клас (ч�
 
 import model.equipment.Ammunition; // Імпорт базового класу амуніції
 import model.equipment.Armor; // Імпорт класу броні (потрібен для розрахунку захисту)
-import java.io.Serializable; // Інтерфейс для збереження об'єкта у файл
+import model.equipment.Weapon; // Імпорт класу зброї
 import java.util.ArrayList; // Реалізація динамічного масиву
 import java.util.List; // Інтерфейс списку
 
-// Клас реалізує Serializable, щоб його можна було записати у файл knights.dat
-public class Knight implements Serializable {
-    // Статична змінна (спільна для всіх лицарів). Відповідає за генерацію унікальних ID.
-    private static int idCounter = 1;
+/**
+ * Клас Knight представляє лицаря з його характеристиками та екіпіруванням.
+ * Дані зберігаються в SQLite базі даних.
+ */
+public class Knight {
 
-    private int id; // Унікальний номер конкретного лицаря
+    private int id; // Унікальний номер конкретного лицаря (генерується SQLite)
     private String name; // Ім'я лицаря
     private String orden; // Назва ордену (фракції)
     private Rank rank; // Ранг (рівень досвіду)
     private int strength; // Сила (впливає на те, скільки ваги можна нести)
     private int baseDefense; // Базовий захист (без броні)
-    // Поле money видалено, оскільки баланс більше не потрібен
 
     // Список предметів, які носить лицар (Інвентар)
     private List<Ammunition> equipment;
 
-    // --- ОНОВЛЕНИЙ КОНСТРУКТОР ---
-    // Викликається при створенні нового об'єкта "new Knight(...)".
+    /**
+     * Конструктор для створення НОВОГО лицаря (без заданого ID).
+     * ID буде присвоєно базою даних при збереженні.
+     */
     public Knight(String name, String orden, Rank rank) {
-        this.id = idCounter++; // Присвоюємо поточний номер і збільшуємо лічильник для наступного лицаря
-        this.name = name; // Зберігаємо ім'я
-        this.orden = orden; // Зберігаємо орден
-        this.rank = rank; // Зберігаємо ранг
-
-        // Фіксовані характеристики для балансу (можна змінити в майбутньому)
+        this.name = name;
+        this.orden = orden;
+        this.rank = rank;
         this.strength = 60; // Сила за замовчуванням
         this.baseDefense = 20; // Базовий захист за замовчуванням
-
-        // Дуже важливо! Ініціалізуємо список, щоб він не був null (створюємо пустий інвентар)
         this.equipment = new ArrayList<>();
     }
 
-    // Розрахунок максимальної ваги: Сила поділена на коефіцієнт 3.25
-    public double getMaxWeightCapacity() { return strength / 3.25; }
+    /**
+     * Конструктор для завантаження ІСНУЮЧОГО лицаря з бази даних (з ID).
+     */
+    public Knight(int id, String name, String orden, Rank rank) {
+        this(name, orden, rank);
+        this.id = id;
+    }
+
+    // Розрахунок максимальної ваги відповідно до рангу лицаря
+    public double getMaxWeightCapacity() {
+        if (rank == null) return 18.0;
+        switch (rank) {
+            case VETERAN: return 20.0;
+            case MASTER: return 22.0;
+            case GRAND_MASTER: return 24.0;
+            case NOVICE:
+            default: return 18.0;
+        }
+    }
 
     // Розрахунок поточної ваги всіх речей
     public double getCurrentWeight() {
@@ -56,42 +70,62 @@ public class Knight implements Serializable {
     }
 
     public boolean equip(Ammunition newItem) {
-        // 1. Знайди, як у тебе називається змінна макс. ваги (можливо maxWeight?)
-        //    Також замість getCurrentWeight() може бути просто змінна currentWeight
+        // Перевіряємо, чи не перевищено ліміт ваги
         if (getCurrentWeight() + newItem.getWeight() > getMaxWeightCapacity()) {
-            System.out.println("НЕВДАЧА: Занадто важко! Ліміт ваги перевищено.");
+            System.out.println("FAILURE: Too heavy! Weight limit exceeded.");
             return false;
         }
 
-        // 2. Знайди, як у тебе називається список речей (можливо equipment?)
-        //    Заміни 'ammunition' на цю назву
-        for (Ammunition existingItem : this.equipment) { //
-
-            if (existingItem.getClass().equals(newItem.getClass())) {
-                System.out.println("НЕВДАЧА: Ви вже маєте предмет типу " + newItem.getClass().getSimpleName() + "!");
+        // Перевіряємо правила для зброї (максимум 2 зброї)
+        if (newItem instanceof Weapon) {
+            long weaponCount = equipment.stream().filter(a -> a instanceof Weapon).count();
+            if (weaponCount >= 2) {
+                System.out.println("FAILURE: You can equip at most 2 weapons!");
                 return false;
+            }
+        } 
+        // Перевіряємо правила для броні (1 шолом, 1 нагрудник, 1 поножі)
+        else if (newItem instanceof Armor) {
+            for (Ammunition existingItem : this.equipment) {
+                if (existingItem.getClass().equals(newItem.getClass())) {
+                    System.out.println("FAILURE: You already have a " + newItem.getClass().getSimpleName() + " equipped!");
+                    return false;
+                }
+            }
+        }
+        // Для інших типів амуніції
+        else {
+            for (Ammunition existingItem : this.equipment) {
+                if (existingItem.getClass().equals(newItem.getClass())) {
+                    System.out.println("FAILURE: You already have an item of type " + newItem.getClass().getSimpleName() + "!");
+                    return false;
+                }
             }
         }
 
-        // 3. Тут теж заміни 'ammunition' на свою назву списку
-        this.equipment.add(newItem); // <-- ТУТ ТЕЖ ЗМІНИ НАЗВУ
+        // Додаємо предмет в екіпірування
+        this.equipment.add(newItem);
         return true;
     }
 
-    // --- ГЕТТЕРИ (Методи для доступу до полів) ---
-    public int getId() { return id; } // Повертає ID
-    public String getName() { return name; } // Повертає ім'я
+    // --- ГЕТТЕРИ ТА СЕТТЕРИ ---
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; } // Сеттер для ID (встановлюється базою даних)
+    public String getName() { return name; }
 
-    // !!! ОСЬ ЦЕЙ МЕТОД Я ДОДАВ (ЙОГО НЕ ВИСТАЧАЛО) !!!
-    public Rank getRank() { return rank; } // Повертає ранг лицаря
+    // Метод для отримання рангу
+    public Rank getRank() { return rank; }
 
-    public List<Ammunition> getEquipment() { return equipment; } // Повертає список речей
+    public List<Ammunition> getEquipment() { return equipment; }
 
+    public String getOrden() {
+        return orden;
+    }
     // Перевизначення методу toString для гарного виводу інформації про лицаря в консоль
     @Override
     public String toString() {
         // Форматуємо рядок з підстановкою значень змінних
-        return String.format("ID:%d | %s (%s, %s) | Вага: %.2f/%.2f",
+        return String.format("ID:%d | %s (%s, %s) | Weight: %.2f/%.2f",
                 id, name, orden, rank, getCurrentWeight(), getMaxWeightCapacity());
     }
 }

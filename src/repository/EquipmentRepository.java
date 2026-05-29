@@ -5,78 +5,117 @@ import model.equipment.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Репозиторій для роботи з каталогом амуніції через SQLite базу даних.
+ * При першому запуску імпортує дані з текстового файлу в базу.
+ */
 public class EquipmentRepository {
     private static final Logger logger = LogManager.getLogger(EquipmentRepository.class);
 
     private List<Ammunition> catalog = new ArrayList<>();
-    private String fileName;
+    private DatabaseManager dbManager;
+    private String ammunitionFilePath;
 
+    /**
+     * Конструктор за замовчуванням: використовує стандартний файл та БД.
+     */
     public EquipmentRepository() {
-        this("C:\\Users\\nazar\\OneDrive\\Desktop\\JavaP\\App_Prog_3\\Knight\\src\\ammunition.txt");
+        this("src/ammunition.txt");
     }
 
-    public EquipmentRepository(String fileName) {
-        this.fileName = fileName;
-        loadFromFile();
+    /**
+     * Конструктор з вказівкою шляху до файлу амуніції.
+     * Імпортує дані з файлу в SQLite (якщо таблиця порожня), потім зчитує з БД.
+     */
+    public EquipmentRepository(String ammunitionFilePath) {
+        this.ammunitionFilePath = ammunitionFilePath;
+        this.dbManager = DatabaseManager.getInstance();
+
+        // Імпортуємо з файлу в БД (тільки якщо таблиця порожня)
+        dbManager.importAmmunitionFromFile(ammunitionFilePath);
+
+        // Завантажуємо з БД у пам'ять
+        loadFromDatabase();
     }
 
+    /**
+     * Конструктор для тестів: дозволяє передати DatabaseManager.
+     */
+    public EquipmentRepository(String ammunitionFilePath, DatabaseManager dbManager) {
+        this.ammunitionFilePath = ammunitionFilePath;
+        this.dbManager = dbManager;
+        dbManager.importAmmunitionFromFile(ammunitionFilePath);
+        loadFromDatabase();
+    }
+
+    /**
+     * Перезавантажує каталог з бази даних.
+     */
     public void reload() {
-        logger.info("Перезавантаження каталогу амуніції..."); // ЛОГ
+        logger.info("Reloading ammunition catalog from database...");
         catalog.clear();
-        loadFromFile();
+        loadFromDatabase();
     }
 
-    private void loadFromFile() {
-        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
-                parseLine(line);
+    /**
+     * Завантажує каталог з таблиці equipment_catalog у пам'ять.
+     */
+    private void loadFromDatabase() {
+        try (Connection conn = dbManager.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT * FROM equipment_catalog")) {
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String type = rs.getString("type");
+                String name = rs.getString("name");
+                double weight = rs.getDouble("weight");
+                double price = rs.getDouble("price");
+                int statValue = rs.getInt("stat_value");
+
+                Ammunition item = createAmmunition(type, name, weight, price, statValue);
+                if (item != null) {
+                    item.setCatalogId(id);
+                    catalog.add(item);
+                }
             }
-            logger.info("Каталог завантажено: " + catalog.size() + " предметів."); // ЛОГ
-        } catch (IOException e) {
-            // ЛОГ ERROR (Відправиться на пошту, бо це критично для роботи магазину)
-            logger.error("КРИТИЧНА ПОМИЛКА: Не вдалося прочитати файл амуніції: " + fileName, e);
+
+            logger.info("Catalog loaded: " + catalog.size() + " items.");
+
+        } catch (SQLException e) {
+            logger.error("CRITICAL ERROR: Failed to load equipment catalog from database!", e);
         }
     }
 
-    private void parseLine(String line) {
-        try {
-            String[] parts = line.split(",");
-            if (parts.length != 5) {
-                logger.warn("Пропущено пошкоджений рядок (невірна кількість полів): " + line); // ЛОГ WARN
-                return;
-            }
-
-            String type = parts[0].trim();
-            String name = parts[1].trim();
-            double weight = Double.parseDouble(parts[2].trim());
-            double price = Double.parseDouble(parts[3].trim());
-            int value = Integer.parseInt(parts[4].trim());
-
-            switch (type) {
-                case "Helmet": catalog.add(new Helmet(name, weight, price, value)); break;
-                case "Breastplate": catalog.add(new Breastplate(name, weight, price, value)); break;
-                case "Sword": catalog.add(new Sword(name, weight, price, value)); break;
-                case "Axe": catalog.add(new Axe(name, weight, price, value)); break;
-                case "Bow": catalog.add(new Bow(name, weight, price, value)); break;
-                case "Knife": catalog.add(new Knife(name, weight, price, value)); break;
-                case "TwoHandedSword": catalog.add(new TwoHandedSword(name, weight, price, value)); break;
-                case "Mace": catalog.add(new Mace(name, weight, price, value)); break;
-                case "Spear": catalog.add(new Spear(name, weight, price, value)); break;
-                default: logger.warn("Невідомий тип предмета у файлі: " + type); // ЛОГ WARN
-            }
-        } catch (Exception e) {
-            logger.error("Помилка парсингу рядка: " + line, e); // ЛОГ ERROR
+    /**
+     * Створює об'єкт Ammunition відповідного типу.
+     */
+    private Ammunition createAmmunition(String type, String name, double weight, double price, int statValue) {
+        switch (type) {
+            case "Helmet": return new Helmet(name, weight, price, statValue);
+            case "Breastplate": return new Breastplate(name, weight, price, statValue);
+            case "Greaves": return new Greaves(name, weight, price, statValue);
+            case "Sword": return new Sword(name, weight, price, statValue);
+            case "Axe": return new Axe(name, weight, price, statValue);
+            case "Bow": return new Bow(name, weight, price, statValue);
+            case "Knife": return new Knife(name, weight, price, statValue);
+            case "Shield": return new Breastplate(name, weight, price, statValue);
+            case "TwoHandedSword": return new TwoHandedSword(name, weight, price, statValue);
+            case "Mace": return new Mace(name, weight, price, statValue);
+            case "Spear": return new Spear(name, weight, price, statValue);
+            default:
+                logger.warn("Unknown item type in database: " + type);
+                return null;
         }
     }
 
+    /**
+     * Повертає весь каталог амуніції.
+     */
     public List<Ammunition> getAll() {
         return catalog;
     }

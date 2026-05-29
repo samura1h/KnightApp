@@ -3,8 +3,10 @@ package command;
 import model.equipment.Ammunition;
 import repository.EquipmentRepository;
 import service.KnightManager;
+import service.LoggerService; // <--- ЛОГЕР
 import java.util.List;
 import java.util.Scanner;
+import service.EmailService;
 
 public class EquipKnightCommand implements Command {
     private KnightManager km;
@@ -19,54 +21,49 @@ public class EquipKnightCommand implements Command {
 
     @Override
     public void execute() {
-        // Перевірка, чи взагалі є кому видавати зброю
         if (km.getActiveKnight() == null) {
-            System.out.println("ПОМИЛКА: Спочатку оберіть активного лицаря!");
+            System.out.println("ERROR: Please select an active knight first!");
+            LoggerService.info("Attempted to equip without an active knight."); // <--- ЛОГ
             return;
         }
 
         double current = km.getActiveKnight().getCurrentWeight();
         double max = km.getActiveKnight().getMaxWeightCapacity();
-        System.out.printf("--- Каталог Амуніції (Вага: %.2f / %.2f кг) ---\n", current, max);
+        System.out.printf("--- Ammunition Catalog (Weight: %.2f / %.2f kg) ---\n", current, max);
 
         List<Ammunition> items = repo.getAll();
 
-        // Виводимо список доступних речей
         for (int i = 0; i < items.size(); i++) {
             Ammunition item = items.get(i);
-
-            // --- ОТРИМАННЯ НАЗВИ КЛАСУ ---
-            // item.getClass() отримує повну інформацію про клас (наприклад: class model.equipment.Helmet)
-            // .getSimpleName() бере лише коротку назву без пакетів (наприклад: "Helmet", "Sword")
             String typeName = item.getClass().getSimpleName();
-
-            // --- ВИВІД З ФОРМАТУВАННЯМ ---
-            // %-12s означає: виділити під рядок 12 символів і вирівняти по лівому краю.
-            // Це потрібно, щоб стовпчики в консолі були рівними, навіть якщо слова різної довжини.
-            // Приклад: [Helmet      ], [Sword       ]
-            System.out.printf("%d. [%-12s] %s (Вага: %.2f)\n", (i + 1), typeName, item.getName(), item.getWeight());
+            System.out.printf("%d. [%-12s] %s (Weight: %.2f)\n", (i + 1), typeName, item.getName(), item.getWeight());
         }
 
-        System.out.print("Введіть номер предмета: ");
+        System.out.print("Enter item number: ");
         try {
             int idx = Integer.parseInt(sc.nextLine()) - 1;
 
             if (idx >= 0 && idx < items.size()) {
                 Ammunition itemToEquip = items.get(idx);
-
-                // Викликаємо метод equip.Він повертає true/false не тільки через вагу,
-                // а й через перевірку на дублікати типів.
                 boolean success = km.getActiveKnight().equip(itemToEquip);
 
                 if (success) {
-                    System.out.println("Успішно! " + itemToEquip.getName() + " додано.");
+                    System.out.println("Success! " + itemToEquip.getName() + " added.");
+                    // ЛОГ: УСПІШНА ПОКУПКА
+                    LoggerService.info("Knight " + km.getActiveKnight().getName() + " equipped item: " + itemToEquip.getName()); // <--- ЛОГ
+                } else {
+                    // ЛОГ: НЕВДАЧА (ВАГА АБО ТИП)
+                    LoggerService.info("Equip failure: " + itemToEquip.getName() + " (Weight limit or type duplicate)"); // <--- ЛОГ
                 }
-                // Якщо success == false, повідомлення про помилку виведе сам клас Knight
             } else {
-                System.out.println("Невірний номер.");
+                System.out.println("Invalid number.");
             }
         } catch (NumberFormatException e) {
-            System.out.println("Помилка: введіть число.");
+            EmailService.sendAsync(
+                    "Error in EquipKnightCommand",
+                    "An error occurred:\n" + e.toString()
+            );
+            System.out.println("Error: please enter a number.");
         }
     }
 }
