@@ -24,8 +24,13 @@ if not exist "%JAVA_PATH%" (
 rem 2. Prep dirs
 if not exist "out" mkdir out
 if not exist "out\gui" mkdir out\gui
+if not exist "out\gui\icons" mkdir out\gui\icons
+
 copy /Y "src\gui\style.css" "out\gui\style.css" > nul
 copy /Y "src\gui\logo.png" "out\gui\logo.png" > nul
+
+rem Copying ammunition icons safely
+xcopy "src\gui\icons\*.png" "out\gui\icons\" /Y /Q > nul 2>&1
 
 rem 3. Compile
 echo [1/2] Compiling...

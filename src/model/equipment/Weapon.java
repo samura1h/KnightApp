@@ -1,14 +1,10 @@
 package model.equipment;
 
-/**
- * Абстрактний клас "Зброя". Успадковується від базової Амуніції.
- * Додає специфічне поле - damage (шкода).
- */
 public abstract class Weapon extends Ammunition {
-    private int damage; // Одиниць урону
+    private int damage; 
 
     public Weapon(String name, double weight, double price, int damage) {
-        super(name, weight, price); // Передаємо загальні параметри батьківському класу
+        super(name, weight, price); 
         this.damage = damage;
     }
 

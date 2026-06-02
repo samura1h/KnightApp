@@ -10,10 +10,12 @@ import javafx.stage.Stage;
 import repository.EquipmentRepository;
 import service.KnightManager;
 import service.LoggerService;
+import command.Command;
+import command.GuiReloadSystemCommand;
+import command.GuiSaveDataCommand;
+import command.GuiHelpCommand;
+import command.GuiSendActiveKnightCommand;
 
-/**
- * Головний макет додатку: Sidebar (ліворуч) + Content Area (праворуч).
- */
 public class MainLayout {
 
     private final BorderPane root;
@@ -21,15 +23,12 @@ public class MainLayout {
     private final EquipmentRepository equipRepo;
     private final Stage primaryStage;
 
-    // Панелі контенту
     private final KnightPane knightPane;
     private final EquipmentPane equipmentPane;
     private final StatsPane statsPane;
 
-    // Поточна активна кнопка бокової панелі
     private Button activeButton = null;
 
-    // Верхня панель — Label для активного лицаря
     private Label activeKnightLabel;
     private Label topBarTitle;
 
@@ -38,29 +37,30 @@ public class MainLayout {
         this.equipRepo = equipRepo;
         this.primaryStage = primaryStage;
 
-        // Створюємо панелі контенту
         this.knightPane = new KnightPane(knightManager, this::refreshActiveKnightDisplay);
         this.equipmentPane = new EquipmentPane(knightManager, equipRepo, this::refreshActiveKnightDisplay);
         this.statsPane = new StatsPane(knightManager, equipRepo);
 
-        // Будуємо layout
         root = new BorderPane();
-        root.setLeft(createSidebar());
+        
+        ScrollPane sidebarScroll = new ScrollPane(createSidebar());
+        sidebarScroll.setFitToWidth(true);
+        sidebarScroll.setFitToHeight(true);
+        sidebarScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        sidebarScroll.setStyle("-fx-background-color: #2B2B2B; -fx-background: #2B2B2B;");
+        sidebarScroll.getStyleClass().add("sidebar-scroll");
+        
+        root.setLeft(sidebarScroll);
         root.setCenter(createContentWrapper(knightPane.getRoot()));
 
-        // Показуємо першу вкладку (Knights)
         refreshActiveKnightDisplay();
     }
 
-    /**
-     * Створює бокову панель навігації.
-     */
     private VBox createSidebar() {
         VBox sidebar = new VBox();
         sidebar.getStyleClass().add("sidebar");
         sidebar.setPrefWidth(220);
 
-        // --- Brand ---
         VBox brandBox = new VBox(4);
         brandBox.getStyleClass().add("sidebar-brand");
 
@@ -71,7 +71,7 @@ public class MainLayout {
         try {
             java.io.InputStream imgStream = getClass().getResourceAsStream("/gui/logo.png");
             if (imgStream != null) {
-                // Завантажуємо зображення з увімкненим високоякісним згладжуванням (smooth = true)
+                
                 Image logoImage = new Image(imgStream, 128, 128, true, true);
                 logoView.setImage(logoImage);
                 logoView.setFitWidth(34);
@@ -79,10 +79,10 @@ public class MainLayout {
                 logoView.setPreserveRatio(true);
                 logoView.setSmooth(true);
                 logoView.setCache(true);
-                logoView.setTranslateY(4); // Зсуваємо трохи вниз для гармонійного вирівнювання з текстом
+                logoView.setTranslateY(4); 
             }
         } catch (Exception e) {
-            // Ігноруємо помилки завантаження
+            
         }
 
         Label brandLabel = new Label("KNIGHT ORDER");
@@ -95,7 +95,6 @@ public class MainLayout {
         subLabel.setStyle("-fx-text-fill: #666666; -fx-font-size: 10px; -fx-padding: 0 0 0 42;");
         brandBox.getChildren().addAll(logoTitleBox, subLabel);
 
-        // --- Navigation section ---
         Label navTitle = new Label("NAVIGATION");
         navTitle.getStyleClass().add("sidebar-title");
 
@@ -106,19 +105,17 @@ public class MainLayout {
             switchContent(statsPane.getRoot(), "Knight Status", "Active knight overview");
         });
 
-        // Перша кнопка активна за замовчуванням
         setActiveButton(btnKnights);
 
-        // --- Separator ---
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        // --- Bottom actions ---
         Label actionsTitle = new Label("ACTIONS");
         actionsTitle.getStyleClass().add("sidebar-title");
 
         Button btnReload = createBottomButton("↻   Reload System", this::handleReload);
         Button btnSave = createBottomButton("💾   Save Data", this::handleSave);
+        Button btnSendInfo = createBottomButton("📧   Send Knight Info", this::handleSendActiveKnight);
         Button btnHelp = createBottomButton("❓   Help", this::handleHelp);
         Button btnExit = createBottomButton("✕   Exit", this::handleExit);
 
@@ -129,15 +126,12 @@ public class MainLayout {
                 spacer,
                 createSidebarSeparator(),
                 actionsTitle,
-                btnReload, btnSave, btnHelp, btnExit
+                btnReload, btnSave, btnSendInfo, btnHelp, btnExit
         );
 
         return sidebar;
     }
 
-    /**
-     * Обгортка для контенту: top bar + scrollable content.
-     */
     private BorderPane createContentWrapper(Region content) {
         BorderPane wrapper = new BorderPane();
         wrapper.setTop(createTopBar("Knights", "Manage your warriors"));
@@ -149,9 +143,6 @@ public class MainLayout {
         return wrapper;
     }
 
-    /**
-     * Верхня панель з назвою секції та бейджем активного лицаря.
-     */
     private HBox createTopBar(String title, String subtitle) {
         HBox topBar = new HBox();
         topBar.getStyleClass().add("top-bar");
@@ -174,14 +165,11 @@ public class MainLayout {
         return topBar;
     }
 
-    /**
-     * Переключає контент на задану панель.
-     */
     private void switchContent(Region content, String title, String subtitle) {
         BorderPane wrapper = (BorderPane) root.getCenter();
-        // Оновлюємо top bar
+        
         topBarTitle.setText(title);
-        // Оновлюємо контент
+        
         ScrollPane scroll = new ScrollPane(content);
         scroll.setFitToWidth(true);
         scroll.setStyle("-fx-background-color: transparent;");
@@ -189,20 +177,33 @@ public class MainLayout {
         wrapper.setCenter(scroll);
     }
 
-    /**
-     * Оновлює відображення активного лицаря у верхній панелі.
-     */
     public void refreshActiveKnightDisplay() {
         if (knightManager.getActiveKnight() != null) {
             var k = knightManager.getActiveKnight();
             activeKnightLabel.setText("⚔ " + k.getName() + "  (" + k.getRank() + ")");
-            activeKnightLabel.setStyle("-fx-text-fill: #333333;");
+
+            activeKnightLabel.setStyle(
+                    "-fx-text-fill: #2c3e50; " +
+                            "-fx-border-color: rgba(0, 168, 204, 0.6); " + 
+                            "-fx-border-width: 1.5px; " +
+                            "-fx-border-radius: 15px; " +                 
+                            "-fx-background-radius: 15px;"
+            );
+
+            javafx.scene.effect.DropShadow glowEffect = new javafx.scene.effect.DropShadow();
+            glowEffect.setColor(javafx.scene.paint.Color.web("#00a8cc")); 
+            glowEffect.setRadius(12.0);  
+            glowEffect.setSpread(0.25);  
+            glowEffect.setOffsetX(0.0);
+            glowEffect.setOffsetY(0.0);
+
+            activeKnightLabel.setEffect(glowEffect); 
         } else {
             activeKnightLabel.setText("No active knight");
             activeKnightLabel.setStyle("-fx-text-fill: #999999;");
+            activeKnightLabel.setEffect(null); 
         }
 
-        // Синхронізуємо дані на всіх вкладках
         if (knightPane != null) {
             knightPane.refreshTable();
         }
@@ -210,8 +211,6 @@ public class MainLayout {
             statsPane.refresh();
         }
     }
-
-    // === Кнопки sidebar ===
 
     private Button createSidebarButton(String text, Runnable action) {
         Button btn = new Button(text);
@@ -250,8 +249,6 @@ public class MainLayout {
         return sep;
     }
 
-    // === Обробники дій ===
-
     private void handleReload() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Reload System");
@@ -259,9 +256,10 @@ public class MainLayout {
         alert.setContentText("All unsaved changes will be lost. Continue?");
         alert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
-                LoggerService.info("User initiated full system reload via GUI.");
-                knightManager.reloadSystem();
+                Command cmd = new GuiReloadSystemCommand(knightManager);
+                cmd.execute();
                 knightPane.refreshTable();
+                equipmentPane.refresh();
                 refreshActiveKnightDisplay();
                 showInfo("System reloaded successfully.");
             }
@@ -269,26 +267,24 @@ public class MainLayout {
     }
 
     private void handleSave() {
-        knightManager.saveAll();
-        LoggerService.info("User saved data via GUI.");
+        Command cmd = new GuiSaveDataCommand(knightManager);
+        cmd.execute();
         showInfo("Data saved successfully.");
     }
 
+    private void handleSendActiveKnight() {
+        if (knightManager.getActiveKnight() == null) {
+            showInfo("No active knight selected.");
+            return;
+        }
+        Command cmd = new GuiSendActiveKnightCommand(knightManager);
+        cmd.execute();
+        showInfo("Active knight data sent to email successfully.");
+    }
+
     private void handleHelp() {
-        LoggerService.info("User viewed help via GUI.");
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Help — Knight Order Management System");
-        alert.setHeaderText("❓ Quick Guide");
-        alert.setContentText(
-                "⚔ Knights — Create, load, delete, and select warriors.\n" +
-                "🛡 Equipment — Browse the ammunition catalog, equip items.\n" +
-                "📊 Status — View active knight stats, weight, defense, cost.\n\n" +
-                "↻ Reload — Reset all data from file.\n" +
-                "💾 Save — Save current state to disk.\n" +
-                "✕ Exit — Save and close the application.\n\n" +
-                "Tip: Select a knight first, then equip items from the catalog."
-        );
-        alert.showAndWait();
+        Command cmd = new GuiHelpCommand();
+        cmd.execute();
     }
 
     private void handleExit() {

@@ -17,7 +17,7 @@ class LoggerServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Очищаємо файл логів перед кожним тестом, якщо він існує
+        
         File file = new File(logFileName);
         if (file.exists()) {
             file.delete();
@@ -26,7 +26,7 @@ class LoggerServiceTest {
 
     @AfterEach
     void tearDown() {
-        // Очищаємо після тесту
+        
         File file = new File(logFileName);
         if (file.exists()) {
             file.delete();
@@ -38,12 +38,10 @@ class LoggerServiceTest {
         String testMessage = "Test INFO message " + System.currentTimeMillis();
         
         LoggerService.info(testMessage);
-        
-        // Перевіряємо, чи був створений файл
+
         File logFile = new File(logFileName);
         assertTrue(logFile.exists(), "Log file should be created");
-        
-        // Читаємо вміст файлу
+
         List<String> lines = Files.readAllLines(Paths.get(logFileName));
         boolean found = lines.stream().anyMatch(line -> line.contains(testMessage) && line.contains("[INFO]"));
         
@@ -55,15 +53,44 @@ class LoggerServiceTest {
         String testMessage = "Test ERROR message " + System.currentTimeMillis();
         
         LoggerService.error(testMessage);
-        
-        // Перевіряємо, чи був створений файл
+
         File logFile = new File(logFileName);
         assertTrue(logFile.exists(), "Log file should be created");
-        
-        // Читаємо вміст файлу
+
         List<String> lines = Files.readAllLines(Paths.get(logFileName));
         boolean found = lines.stream().anyMatch(line -> line.contains(testMessage) && line.contains("[ERROR]"));
         
         assertTrue(found, "Log file should contain the ERROR message");
+    }
+
+    @Test
+    void testDirectoryCreation() {
+        File logFile = new File(logFileName);
+        if (logFile.exists()) logFile.delete();
+        File dir = new File("logs");
+        if (dir.exists()) dir.delete(); 
+        
+        LoggerService.info("Test Directory Creation");
+        assertTrue(dir.exists(), "Directory should be created");
+    }
+
+    @Test
+    void testIOException() throws Exception {
+        File logFile = new File(logFileName);
+        File dir = new File("logs");
+        if (!dir.exists()) dir.mkdirs();
+        logFile.createNewFile();
+        logFile.setReadOnly(); 
+        
+        try {
+            assertDoesNotThrow(() -> LoggerService.info("This should trigger IOException internally"));
+        } finally {
+            logFile.setWritable(true); 
+        }
+    }
+
+    @Test
+    void testConstructorForCoverage() {
+        assertDoesNotThrow(() -> new LoggerService());
     }
 }

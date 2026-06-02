@@ -35,23 +35,30 @@ class EquipmentRepositoryTest {
 
     @Test
     void testLoadFromDatabase(@TempDir Path tempDir) throws Exception {
-        // Підготовка: створюємо тимчасовий файл з амуніцією
+        
         File tempFile = tempDir.resolve("full_ammo.txt").toFile();
 
         try (FileWriter writer = new FileWriter(tempFile)) {
             writer.write("Sword, King Sword, 12.5, 1000.0, 50\n");
             writer.write("Helmet, Iron Helm, 5.0, 200.0, 20\n");
+            writer.write("Breastplate, Iron Armor, 15.0, 500.0, 40\n");
+            writer.write("Greaves, Iron Boots, 4.0, 150.0, 15\n");
+            writer.write("Axe, Battle Axe, 10.0, 300.0, 40\n");
+            writer.write("Bow, Longbow, 2.0, 150.0, 25\n");
+            writer.write("Knife, Dagger, 1.0, 50.0, 10\n");
+            writer.write("Shield, Wooden Shield, 5.0, 100.0, 15\n");
+            writer.write("TwoHandedSword, Claymore, 18.0, 1200.0, 60\n");
+            writer.write("Mace, Morning Star, 8.0, 250.0, 35\n");
+            writer.write("Spear, Long Spear, 6.0, 200.0, 30\n");
+            writer.write("UnknownType, Glitch, 0, 0, 0\n");
         }
 
-        // Створюємо репозиторій, що імпортує файл у БД
         EquipmentRepository repository = new EquipmentRepository(tempFile.getAbsolutePath(), dbManager);
         List<Ammunition> items = repository.getAll();
 
-        // Перевіряємо, чи завантажилось рівно 2 об'єкти
-        assertEquals(2, items.size());
+        assertEquals(11, items.size());
 
-        // Детальна перевірка полів першого об'єкта
-        Ammunition sword = items.get(0);
+        Ammunition sword = items.stream().filter(i -> i.getName().equals("King Sword")).findFirst().get();
         assertEquals("King Sword", sword.getName());
         assertEquals(12.5, sword.getWeight());
         assertEquals(1000.0, sword.getPrice());
@@ -68,8 +75,7 @@ class EquipmentRepositoryTest {
 
         EquipmentRepository repository = new EquipmentRepository(tempFile.getAbsolutePath(), dbManager);
         assertEquals(1, repository.getAll().size());
-        
-        // Додаємо запис безпосередньо в БД
+
         try (java.sql.Connection conn = dbManager.getConnection();
              java.sql.PreparedStatement ps = conn.prepareStatement("INSERT INTO equipment_catalog (type, name, weight, price, stat_value) VALUES (?, ?, ?, ?, ?)")) {
             ps.setString(1, "Sword");
@@ -80,7 +86,6 @@ class EquipmentRepositoryTest {
             ps.executeUpdate();
         }
 
-        // Крок 3: Викликаємо метод оновлення
         repository.reload();
 
         List<Ammunition> items = repository.getAll();

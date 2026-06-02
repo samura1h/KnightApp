@@ -21,14 +21,15 @@ class GuiMainTest extends ApplicationTest {
 
     @Override
     public void start(Stage stage) throws Exception {
-        // Запускаємо додаток
+        
         GuiMain app = new GuiMain();
+        app.init();
         app.start(stage);
     }
 
     @BeforeEach
     public void setUp() throws Exception {
-        // Використовуємо тестову БД
+        
         DatabaseManager.resetInstance();
         DatabaseManager.getInstance("jdbc:sqlite:" + TEST_DB_PATH);
         
@@ -39,8 +40,7 @@ class GuiMainTest extends ApplicationTest {
     @AfterEach
     public void tearDown() throws Exception {
         FxToolkit.hideStage();
-        
-        // Видаляємо тестову БД
+
         File db = new File(TEST_DB_PATH);
         if (db.exists()) {
             db.delete();
@@ -49,11 +49,10 @@ class GuiMainTest extends ApplicationTest {
 
     @Test
     void testApplicationStarts() {
-        // Перевіряємо, чи є головний заголовок бокової панелі
+        
         Label brandLabel = lookup("KNIGHT ORDER").queryAs(Label.class);
         assertNotNull(brandLabel);
-        
-        // Перевіряємо, чи є кнопки
+
         assertNotNull(lookup("⚔   Knights").queryButton());
         assertNotNull(lookup("🛡   Equipment").queryButton());
         assertNotNull(lookup("📊   Status").queryButton());
@@ -61,34 +60,29 @@ class GuiMainTest extends ApplicationTest {
 
     @Test
     void testAddKnightFlow() {
-        // Натискаємо кнопку додавання
-        clickOn("Add Knight");
         
-        // Заповнюємо форму
+        clickOn("+ Create Knight");
+
         clickOn("#nameField").write("TestKnightFX");
         clickOn("#ordenField").write("FX Order");
-        clickOn("#rankComboBox").clickOn("MASTER");
-        
-        // Зберігаємо
-        clickOn("Save");
+        clickOn("#rankComboBox").clickOn("Master");
 
-        // Перевіряємо, чи лицар з'явився в таблиці
+        clickOn("OK");
+
         TableView<?> table = lookup(".table-view").queryAs(TableView.class);
         assertFalse(table.getItems().isEmpty(), "Table should have at least one knight");
-        
-        // Активний лицар змінився
+
         Label activeBadge = lookup(".active-knight-badge").queryAs(Label.class);
         assertTrue(activeBadge.getText().contains("TestKnightFX"), "Active badge should show the new knight");
     }
 
     @Test
     void testNavigation() {
-        // Переходимо на вкладку Equipment
+        
         clickOn("🛡   Equipment");
         Label equipmentTitle = lookup(".top-bar-title").queryAs(Label.class);
         assertEquals("Equipment", equipmentTitle.getText());
-        
-        // Переходимо на вкладку Status
+
         clickOn("📊   Status");
         Label statusTitle = lookup(".top-bar-title").queryAs(Label.class);
         assertEquals("Knight Status", statusTitle.getText());

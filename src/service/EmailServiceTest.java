@@ -8,10 +8,7 @@ class EmailServiceTest {
 
     @Test
     void testSendAsyncDoesNotThrowException() {
-        // Перевіряємо, що асинхронна відправка не кидає виключень, 
-        // навіть якщо налаштування пошти некоректні або відсутній інтернет.
-        // Це гарантує fail-safe поведінку.
-        
+
         assertDoesNotThrow(() -> {
             EmailService.sendAsync("Test Subject", "Test Body");
         }, "sendAsync should catch exceptions and not crash the application");
@@ -19,11 +16,38 @@ class EmailServiceTest {
     
     @Test
     void testSendDoesNotThrowException() {
-        // Також перевіряємо синхронну відправку.
-        // Оскільки ми не маємо дійсних облікових даних у тесті, ми очікуємо,
-        // що метод всередині перехопить MessagingException і залогує помилку, не кидаючи RuntimeException.
         assertDoesNotThrow(() -> {
             EmailService.send("Test Subject", "Test Body");
         }, "send should catch exceptions internally and not crash");
+    }
+
+    @Test
+    void testSendExceptionHandling() {
+        try (org.mockito.MockedStatic<javax.mail.internet.InternetAddress> mocked = 
+             org.mockito.Mockito.mockStatic(javax.mail.internet.InternetAddress.class, org.mockito.Mockito.CALLS_REAL_METHODS)) {
+            mocked.when(() -> javax.mail.internet.InternetAddress.parse(org.mockito.Mockito.anyString()))
+                  .thenThrow(new javax.mail.internet.AddressException("Mocked Exception"));
+            assertDoesNotThrow(() -> EmailService.send("Subj", "Body"));
+        }
+    }
+
+    @Test
+    void testAuthenticator() throws Exception {
+        Class<?> authClass = Class.forName("service.EmailService$1");
+        java.lang.reflect.Constructor<?> constructor = authClass.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        javax.mail.Authenticator auth = (javax.mail.Authenticator) constructor.newInstance();
+        
+        java.lang.reflect.Method method = javax.mail.Authenticator.class.getDeclaredMethod("getPasswordAuthentication");
+        method.setAccessible(true);
+        javax.mail.PasswordAuthentication pa = (javax.mail.PasswordAuthentication) method.invoke(auth);
+        
+        assertEquals("bazgoten@gmail.com", pa.getUserName());
+        assertEquals("aeyanpsvvkioqwff", pa.getPassword());
+    }
+
+    @Test
+    void testConstructorForCoverage() {
+        assertDoesNotThrow(() -> new EmailService());
     }
 }

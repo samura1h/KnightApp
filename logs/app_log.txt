@@ -1,0 +1,48 @@
+[2026-05-31 22:31:40] [INFO] APPLICATION LAUNCH (System Start)
+[2026-05-31 22:31:40] [INFO] APPLICATION LAUNCH (GUI Mode)
+[2026-05-31 22:31:41] [INFO] GUI window is opening...
+[2026-05-31 22:31:43] [INFO] GUI launched successfully.
+[2026-05-31 22:31:48] [INFO] Active knight set via GUI: Vasyl
+[2026-05-31 22:31:48] [INFO] Calculated equipment defense via GUI for knight: Vasyl
+[2026-05-31 22:31:48] [INFO] Calculated equipment damage via GUI for knight: Vasyl
+[2026-05-31 22:31:48] [INFO] Calculated equipment cost via GUI for knight: Vasyl
+[2026-05-31 22:31:48] [INFO] Viewed knight status via GUI: Vasyl
+[2026-05-31 22:31:50] [INFO] Active knight data sent to email: Vasyl
+[2026-05-31 22:33:52] [INFO] User closed GUI window. Saving data...
+[2026-05-31 22:33:52] [INFO] APPLICATION SHUTDOWN (System Stop)
+[2026-05-31 22:34:01] [INFO] APPLICATION LAUNCH (System Start)
+[2026-05-31 22:34:01] [INFO] APPLICATION LAUNCH (GUI Mode)
+[2026-05-31 22:34:03] [INFO] GUI window is opening...
+[2026-05-31 22:34:05] [INFO] GUI launched successfully.
+[2026-05-31 22:34:08] [INFO] User closed GUI window. Saving data...
+[2026-05-31 22:34:08] [INFO] APPLICATION SHUTDOWN (System Stop)
+[2026-05-31 22:36:33] [INFO] APPLICATION LAUNCH (System Start)
+[2026-05-31 22:36:33] [INFO] APPLICATION LAUNCH (GUI Mode)
+[2026-05-31 22:36:34] [INFO] GUI window is opening...
+[2026-05-31 22:36:36] [INFO] GUI launched successfully.
+[2026-05-31 22:36:52] [INFO] Active knight set via GUI: Vasyl
+[2026-05-31 22:36:52] [INFO] Calculated equipment defense via GUI for knight: Vasyl
+[2026-05-31 22:36:52] [INFO] Calculated equipment damage via GUI for knight: Vasyl
+[2026-05-31 22:36:52] [INFO] Calculated equipment cost via GUI for knight: Vasyl
+[2026-05-31 22:36:52] [INFO] Viewed knight status via GUI: Vasyl
+[2026-05-31 22:36:54] [INFO] Active knight data sent to email: Vasyl
+[2026-05-31 22:37:30] [INFO] User closed GUI window. Saving data...
+[2026-05-31 22:37:31] [INFO] APPLICATION SHUTDOWN (System Stop)
+[2026-05-31 22:37:38] [INFO] APPLICATION LAUNCH (System Start)
+[2026-05-31 22:37:38] [INFO] APPLICATION LAUNCH (GUI Mode)
+[2026-05-31 22:37:40] [INFO] GUI window is opening...
+[2026-05-31 22:37:42] [INFO] GUI launched successfully.
+[2026-05-31 22:37:50] [INFO] User closed GUI window. Saving data...
+[2026-05-31 22:37:50] [INFO] APPLICATION SHUTDOWN (System Stop)
+[2026-05-31 22:38:55] [INFO] APPLICATION LAUNCH (System Start)
+[2026-05-31 22:38:55] [INFO] APPLICATION LAUNCH (GUI Mode)
+[2026-05-31 22:38:56] [INFO] GUI window is opening...
+[2026-05-31 22:38:58] [INFO] GUI launched successfully.
+[2026-05-31 22:39:02] [INFO] User closed GUI window. Saving data...
+[2026-05-31 22:39:02] [INFO] APPLICATION SHUTDOWN (System Stop)
+[2026-06-01 16:35:10] [INFO] APPLICATION LAUNCH (System Start)
+[2026-06-01 16:35:10] [INFO] APPLICATION LAUNCH (GUI Mode)
+[2026-06-01 16:35:11] [INFO] GUI window is opening...
+[2026-06-01 16:35:13] [INFO] GUI launched successfully.
+[2026-06-01 16:35:18] [INFO] User closed GUI window. Saving data...
+[2026-06-01 16:35:18] [INFO] APPLICATION SHUTDOWN (System Stop)

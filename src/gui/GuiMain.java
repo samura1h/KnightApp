@@ -9,10 +9,6 @@ import repository.KnightRepository;
 import service.KnightManager;
 import service.LoggerService;
 
-/**
- * Головний клас JavaFX-додатку.
- * Ініціалізує сервіси та запускає графічний інтерфейс.
- */
 public class GuiMain extends Application {
 
     private KnightManager knightManager;
@@ -21,13 +17,12 @@ public class GuiMain extends Application {
 
     @Override
     public void init() {
-        // Ініціалізуємо базу даних SQLite
+        
         DatabaseManager.getInstance();
 
-        // Ініціалізація репозиторіїв та менеджера (до побудови UI)
         equipRepo = new EquipmentRepository();
         knightRepo = new KnightRepository();
-        knightRepo.loadData(); // Завантажуємо лицарів з БД
+        knightRepo.loadData(); 
         knightManager = new KnightManager(knightRepo, equipRepo);
     }
 
@@ -35,18 +30,15 @@ public class GuiMain extends Application {
     public void start(Stage primaryStage) {
         LoggerService.info("GUI window is opening...");
 
-        // Створюємо головний layout
         MainLayout mainLayout = new MainLayout(knightManager, equipRepo, primaryStage);
 
-        // Створюємо сцену
         Scene scene = new Scene(mainLayout.getRoot(), 1100, 720);
 
-        // Підключаємо CSS-стилі
         String css = getClass().getResource("/gui/style.css") != null
                 ? getClass().getResource("/gui/style.css").toExternalForm()
                 : null;
         if (css == null) {
-            // Спроба завантажити з файлової системи
+            
             try {
                 java.io.File cssFile = new java.io.File("src/gui/style.css");
                 if (cssFile.exists()) {
@@ -58,13 +50,11 @@ public class GuiMain extends Application {
             scene.getStylesheets().add(css);
         }
 
-        // Налаштовуємо вікно
         primaryStage.setTitle("Knight Order Management System v1.0");
         primaryStage.setScene(scene);
         primaryStage.setMinWidth(900);
         primaryStage.setMinHeight(600);
 
-        // Зберігаємо дані при закритті вікна
         primaryStage.setOnCloseRequest(event -> {
             LoggerService.info("User closed GUI window. Saving data...");
             knightManager.saveAll();

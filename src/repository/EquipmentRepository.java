@@ -1,7 +1,6 @@
 package repository;
 
 import model.equipment.*;
-// --- ІМПОРТИ ЛОГЕРА ---
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -9,10 +8,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Репозиторій для роботи з каталогом амуніції через SQLite базу даних.
- * При першому запуску імпортує дані з текстового файлу в базу.
- */
 public class EquipmentRepository {
     private static final Logger logger = LogManager.getLogger(EquipmentRepository.class);
 
@@ -20,31 +15,19 @@ public class EquipmentRepository {
     private DatabaseManager dbManager;
     private String ammunitionFilePath;
 
-    /**
-     * Конструктор за замовчуванням: використовує стандартний файл та БД.
-     */
     public EquipmentRepository() {
         this("src/ammunition.txt");
     }
 
-    /**
-     * Конструктор з вказівкою шляху до файлу амуніції.
-     * Імпортує дані з файлу в SQLite (якщо таблиця порожня), потім зчитує з БД.
-     */
     public EquipmentRepository(String ammunitionFilePath) {
         this.ammunitionFilePath = ammunitionFilePath;
         this.dbManager = DatabaseManager.getInstance();
 
-        // Імпортуємо з файлу в БД (тільки якщо таблиця порожня)
         dbManager.importAmmunitionFromFile(ammunitionFilePath);
 
-        // Завантажуємо з БД у пам'ять
         loadFromDatabase();
     }
 
-    /**
-     * Конструктор для тестів: дозволяє передати DatabaseManager.
-     */
     public EquipmentRepository(String ammunitionFilePath, DatabaseManager dbManager) {
         this.ammunitionFilePath = ammunitionFilePath;
         this.dbManager = dbManager;
@@ -52,18 +35,12 @@ public class EquipmentRepository {
         loadFromDatabase();
     }
 
-    /**
-     * Перезавантажує каталог з бази даних.
-     */
     public void reload() {
         logger.info("Reloading ammunition catalog from database...");
         catalog.clear();
         loadFromDatabase();
     }
 
-    /**
-     * Завантажує каталог з таблиці equipment_catalog у пам'ять.
-     */
     private void loadFromDatabase() {
         try (Connection conn = dbManager.getConnection();
              Statement stmt = conn.createStatement();
@@ -80,20 +57,21 @@ public class EquipmentRepository {
                 Ammunition item = createAmmunition(type, name, weight, price, statValue);
                 if (item != null) {
                     item.setCatalogId(id);
+                    item.setIcon(rs.getString("icon"));
                     catalog.add(item);
                 }
             }
 
             logger.info("Catalog loaded: " + catalog.size() + " items.");
+            System.out.println("DEBUG: EquipmentRepository loaded " + catalog.size() + " items from DB.");
 
         } catch (SQLException e) {
-            logger.error("CRITICAL ERROR: Failed to load equipment catalog from database!", e);
+            service.LoggerService.error("CRITICAL ERROR: Failed to load equipment catalog from database!", e);
+            System.err.println("DEBUG: EquipmentRepository failed to load from DB: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    /**
-     * Створює об'єкт Ammunition відповідного типу.
-     */
     private Ammunition createAmmunition(String type, String name, double weight, double price, int statValue) {
         switch (type) {
             case "Helmet": return new Helmet(name, weight, price, statValue);
@@ -113,9 +91,6 @@ public class EquipmentRepository {
         }
     }
 
-    /**
-     * Повертає весь каталог амуніції.
-     */
     public List<Ammunition> getAll() {
         return catalog;
     }

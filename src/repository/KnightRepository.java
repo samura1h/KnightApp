@@ -3,7 +3,6 @@ package repository;
 import model.Knight;
 import model.Rank;
 import model.equipment.*;
-// --- ІМПОРТИ ЛОГЕРА ---
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,9 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Репозиторій для роботи з лицарями через SQLite базу даних.
- */
 public class KnightRepository {
     private static final Logger logger = LogManager.getLogger(KnightRepository.class);
 
@@ -26,21 +22,15 @@ public class KnightRepository {
         this.dbManager = DatabaseManager.getInstance();
     }
 
-    /**
-     * Конструктор для тестів: дозволяє передати свій DatabaseManager.
-     */
     public KnightRepository(DatabaseManager dbManager) {
         this.dbManager = dbManager;
     }
 
-    /**
-     * Завантажує всіх лицарів з бази даних (включаючи їхнє спорядження).
-     */
     public void loadData() {
         knights.clear();
 
         try (Connection conn = dbManager.getConnection()) {
-            // 1. Завантажуємо лицарів
+            
             try (Statement stmt = conn.createStatement();
                  ResultSet rs = stmt.executeQuery("SELECT * FROM knights")) {
 
@@ -55,9 +45,8 @@ public class KnightRepository {
                 }
             }
 
-            // 2. Завантажуємо екіпірування для кожного лицаря
             String equipSql =
-                "SELECT ke.knight_id, ec.id AS catalog_id, ec.type, ec.name, ec.weight, ec.price, ec.stat_value " +
+                "SELECT ke.knight_id, ec.id AS catalog_id, ec.type, ec.name, ec.weight, ec.price, ec.stat_value, ec.icon " +
                 "FROM knight_equipment ke " +
                 "JOIN equipment_catalog ec ON ke.catalog_id = ec.id";
 
@@ -78,6 +67,7 @@ public class KnightRepository {
                     );
                     if (item != null) {
                         item.setCatalogId(rs.getInt("catalog_id"));
+                        item.setIcon(rs.getString("icon"));
                         knight.getEquipment().add(item);
                     }
                 }
@@ -86,14 +76,11 @@ public class KnightRepository {
             logger.info("Successfully loaded " + knights.size() + " knights from database.");
 
         } catch (SQLException e) {
-            logger.error("CRITICAL ERROR: Failed to load data from database!", e);
+            service.LoggerService.error("CRITICAL ERROR: Failed to load data from database!", e);
             knights = new HashMap<>();
         }
     }
 
-    /**
-     * Зберігає всіх лицарів у базу даних.
-     */
     public void saveData() {
         try (Connection conn = dbManager.getConnection()) {
             conn.setAutoCommit(false);
@@ -106,16 +93,13 @@ public class KnightRepository {
             logger.info("Data successfully saved to database.");
 
         } catch (SQLException e) {
-            logger.error("CRITICAL ERROR: Failed to save data to database!", e);
+            service.LoggerService.error("CRITICAL ERROR: Failed to save data to database!", e);
         }
     }
 
-    /**
-     * Зберігає одного лицаря в базу даних (INSERT або UPDATE).
-     */
     private void saveKnightToDb(Connection conn, Knight k) throws SQLException {
         if (k.getId() == 0) {
-            // Новий лицар — INSERT
+            
             String insertSql = "INSERT INTO knights (name, orden, rank) VALUES (?, ?, ?)";
             try (PreparedStatement ps = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setString(1, k.getName());
@@ -130,7 +114,7 @@ public class KnightRepository {
                 }
             }
         } else {
-            // Існуючий лицар — UPDATE
+            
             String updateSql = "UPDATE knights SET name = ?, orden = ?, rank = ? WHERE id = ?";
             try (PreparedStatement ps = conn.prepareStatement(updateSql)) {
                 ps.setString(1, k.getName());
@@ -141,7 +125,6 @@ public class KnightRepository {
             }
         }
 
-        // Зберігаємо екіпірування: видаляємо старе і додаємо нове
         try (PreparedStatement delPs = conn.prepareStatement("DELETE FROM knight_equipment WHERE knight_id = ?")) {
             delPs.setInt(1, k.getId());
             delPs.executeUpdate();
@@ -160,25 +143,19 @@ public class KnightRepository {
         }
     }
 
-    /**
-     * Перезавантажує дані з бази.
-     */
     public void reload() {
         logger.info("Clearing knights memory and reloading from database...");
         knights.clear();
         loadData();
     }
 
-    /**
-     * Додає лицаря в пам'ять і відразу зберігає в базу даних.
-     */
     public void save(Knight k) {
         try (Connection conn = dbManager.getConnection()) {
             conn.setAutoCommit(false);
             saveKnightToDb(conn, k);
             conn.commit();
         } catch (SQLException e) {
-            logger.error("Failed to save knight: " + k.getName(), e);
+            service.LoggerService.error("Failed to save knight: " + k.getName(), e);
         }
         knights.put(k.getId(), k);
     }
@@ -187,31 +164,25 @@ public class KnightRepository {
 
     public Map<Integer, Knight> findAll() { return knights; }
 
-    /**
-     * Видаляє лицаря з пам'яті та з бази даних.
-     */
     public void remove(int id) {
         knights.remove(id);
 
         try (Connection conn = dbManager.getConnection()) {
-            // Каскадне видалення: спочатку видаляємо екіпірування
+            
             try (PreparedStatement ps = conn.prepareStatement("DELETE FROM knight_equipment WHERE knight_id = ?")) {
                 ps.setInt(1, id);
                 ps.executeUpdate();
             }
-            // Потім самого лицаря
+            
             try (PreparedStatement ps = conn.prepareStatement("DELETE FROM knights WHERE id = ?")) {
                 ps.setInt(1, id);
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
-            logger.error("Failed to remove knight ID: " + id, e);
+            service.LoggerService.error("Failed to remove knight ID: " + id, e);
         }
     }
 
-    /**
-     * Створює об'єкт Ammunition відповідного типу за текстовим рядком типу.
-     */
     private Ammunition createAmmunition(String type, String name, double weight, double price, int statValue) {
         switch (type) {
             case "Helmet": return new Helmet(name, weight, price, statValue);

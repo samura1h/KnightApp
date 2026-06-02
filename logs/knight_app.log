@@ -1,0 +1,59 @@
+2026-05-29 02:06:11 [JavaFX-Launcher] INFO  repository.EquipmentRepository - Catalog loaded: 55 items.
+2026-05-29 02:06:17 [JavaFX Application Thread] INFO  service.KnightManager - Attempting to save all data...
+2026-05-29 02:06:17 [JavaFX Application Thread] INFO  repository.KnightRepository - Data successfully saved to disk.
+2026-05-29 02:08:00 [main] INFO  repository.EquipmentRepository - Catalog loaded: 55 items.
+2026-05-29 02:11:55 [JavaFX-Launcher] INFO  repository.EquipmentRepository - Catalog loaded: 55 items.
+2026-05-29 02:12:04 [JavaFX Application Thread] INFO  service.KnightManager - Attempting to save all data...
+2026-05-29 02:12:04 [JavaFX Application Thread] INFO  repository.KnightRepository - Data successfully saved to disk.
+2026-05-29 02:23:37 [JavaFX-Launcher] ERROR repository.DatabaseManager - CRITICAL ERROR: Failed to initialize database!
+java.sql.SQLException: No suitable driver found for jdbc:sqlite:knight_app.db
+	at java.sql.DriverManager.getConnection(DriverManager.java:638) ~[java.sql:?]
+	at java.sql.DriverManager.getConnection(DriverManager.java:222) ~[java.sql:?]
+	at repository.DatabaseManager.getConnection(DatabaseManager.java:66) ~[out/:?]
+	at repository.DatabaseManager.initializeDatabase(DatabaseManager.java:73) [out/:?]
+	at repository.DatabaseManager.<init>(DatabaseManager.java:31) [out/:?]
+	at repository.DatabaseManager.getInstance(DatabaseManager.java:39) [out/:?]
+	at repository.EquipmentRepository.<init>(EquipmentRepository.java:36) [out/:?]
+	at repository.EquipmentRepository.<init>(EquipmentRepository.java:27) [out/:?]
+	at gui.GuiMain.init(GuiMain.java:24) [out/:?]
+	at com.sun.javafx.application.LauncherImpl.launchApplication1(LauncherImpl.java:823) [javafx.graphics.jar:?]
+	at com.sun.javafx.application.LauncherImpl.lambda$launchApplication$0(LauncherImpl.java:202) [javafx.graphics.jar:?]
+	at java.lang.Thread.run(Thread.java:1516) [?:?]
+2026-05-29 02:23:37 [JavaFX-Launcher] ERROR repository.DatabaseManager - CRITICAL ERROR: Failed to import ammunition data!
+java.sql.SQLException: No suitable driver found for jdbc:sqlite:knight_app.db
+	at java.sql.DriverManager.getConnection(DriverManager.java:638) ~[java.sql:?]
+	at java.sql.DriverManager.getConnection(DriverManager.java:222) ~[java.sql:?]
+	at repository.DatabaseManager.getConnection(DatabaseManager.java:66) ~[out/:?]
+	at repository.DatabaseManager.importAmmunitionFromFile(DatabaseManager.java:124) [out/:?]
+	at repository.EquipmentRepository.<init>(EquipmentRepository.java:39) [out/:?]
+	at repository.EquipmentRepository.<init>(EquipmentRepository.java:27) [out/:?]
+	at gui.GuiMain.init(GuiMain.java:24) [out/:?]
+	at com.sun.javafx.application.LauncherImpl.launchApplication1(LauncherImpl.java:823) [javafx.graphics.jar:?]
+	at com.sun.javafx.application.LauncherImpl.lambda$launchApplication$0(LauncherImpl.java:202) [javafx.graphics.jar:?]
+	at java.lang.Thread.run(Thread.java:1516) [?:?]
+2026-05-29 02:23:37 [JavaFX-Launcher] ERROR repository.EquipmentRepository - CRITICAL ERROR: Failed to load equipment catalog from database!
+java.sql.SQLException: No suitable driver found for jdbc:sqlite:knight_app.db
+	at java.sql.DriverManager.getConnection(DriverManager.java:638) ~[java.sql:?]
+	at java.sql.DriverManager.getConnection(DriverManager.java:222) ~[java.sql:?]
+	at repository.DatabaseManager.getConnection(DatabaseManager.java:66) ~[out/:?]
+	at repository.EquipmentRepository.loadFromDatabase(EquipmentRepository.java:68) [out/:?]
+	at repository.EquipmentRepository.<init>(EquipmentRepository.java:42) [out/:?]
+	at repository.EquipmentRepository.<init>(EquipmentRepository.java:27) [out/:?]
+	at gui.GuiMain.init(GuiMain.java:24) [out/:?]
+	at com.sun.javafx.application.LauncherImpl.launchApplication1(LauncherImpl.java:823) [javafx.graphics.jar:?]
+	at com.sun.javafx.application.LauncherImpl.lambda$launchApplication$0(LauncherImpl.java:202) [javafx.graphics.jar:?]
+	at java.lang.Thread.run(Thread.java:1516) [?:?]
+2026-05-29 19:39:46 [JavaFX-Launcher] INFO  repository.DatabaseManager - Database initialized successfully.
+2026-05-29 19:39:46 [JavaFX-Launcher] INFO  repository.DatabaseManager - Imported 55 items from src/ammunition.txt into database.
+2026-05-29 19:39:46 [JavaFX-Launcher] INFO  repository.EquipmentRepository - Catalog loaded: 55 items.
+2026-05-29 19:39:46 [JavaFX-Launcher] INFO  repository.KnightRepository - Successfully loaded 0 knights from database.
+2026-05-29 21:52:36 [main] INFO  repository.DatabaseManager - Database initialized successfully.
+2026-05-29 21:52:36 [main] INFO  repository.DatabaseManager - Equipment catalog already populated (55 items). Skipping import.
+2026-05-29 21:52:36 [main] INFO  repository.EquipmentRepository - Catalog loaded: 55 items.
+2026-05-29 21:52:36 [main] INFO  repository.KnightRepository - Successfully loaded 0 knights from database.
+2026-05-29 22:44:57 [main] INFO  repository.DatabaseManager - Database initialized successfully.
+2026-05-29 22:44:57 [main] INFO  repository.DatabaseManager - Equipment catalog already populated (55 items). Skipping import.
+2026-05-29 22:44:57 [main] INFO  repository.EquipmentRepository - Catalog loaded: 55 items.
+2026-05-29 22:44:57 [main] INFO  repository.KnightRepository - Successfully loaded 0 knights from database.
+2026-05-29 22:45:14 [main] INFO  service.KnightManager - Attempting to save all data...
+2026-05-29 22:45:14 [main] INFO  repository.KnightRepository - Data successfully saved to database.

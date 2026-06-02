@@ -1,14 +1,10 @@
 package model.equipment;
 
-/**
- * Абстрактний клас Броня. Розширює Амуніцію.
- * Додає нову характеристику - захист.
- */
 public abstract class Armor extends Ammunition {
-    private int defense; // Показник захисту
+    private int defense; 
 
     public Armor(String name, double weight, double price, int defense) {
-        super(name, weight, price); // Викликаємо конструктор батька (Ammunition)
+        super(name, weight, price); 
         this.defense = defense;
     }
     public int getDefense() { return defense; }
