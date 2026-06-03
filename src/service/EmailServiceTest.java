@@ -23,11 +23,27 @@ class EmailServiceTest {
 
     @Test
     void testSendExceptionHandling() {
-        try (org.mockito.MockedStatic<javax.mail.internet.InternetAddress> mocked = 
-             org.mockito.Mockito.mockStatic(javax.mail.internet.InternetAddress.class, org.mockito.Mockito.CALLS_REAL_METHODS)) {
+        org.mockito.MockedStatic<javax.mail.internet.InternetAddress> mocked = 
+             org.mockito.Mockito.mockStatic(javax.mail.internet.InternetAddress.class, org.mockito.Mockito.CALLS_REAL_METHODS);
+        try {
             mocked.when(() -> javax.mail.internet.InternetAddress.parse(org.mockito.Mockito.anyString()))
                   .thenThrow(new javax.mail.internet.AddressException("Mocked Exception"));
             assertDoesNotThrow(() -> EmailService.send("Subj", "Body"));
+        } finally {
+            mocked.close();
+        }
+    }
+
+    @Test
+    void testTestModeToggle() {
+        boolean original = EmailService.isTestMode();
+        try {
+            EmailService.setTestMode(true);
+            assertTrue(EmailService.isTestMode());
+            EmailService.setTestMode(false);
+            assertFalse(EmailService.isTestMode());
+        } finally {
+            EmailService.setTestMode(original);
         }
     }
 

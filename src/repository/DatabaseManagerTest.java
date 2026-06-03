@@ -59,10 +59,10 @@ class DatabaseManagerTest {
         try (FileWriter writer = new FileWriter(tempAmmoFile)) {
             writer.write("Sword, Test Sword, 10.5, 100.0, 15\n");
             writer.write("Helmet, Test Helmet, 2.0, 50.0, 5\n");
-            
-            writer.write("Invalid, Data\n");
-            
-            writer.write("Axe, Bad Axe, 1.0, bad, 10\n");
+            writer.write("\n"); // Empty line
+            writer.write("   \n"); // Blank line
+            writer.write("Invalid, Data\n"); // Wrong columns
+            writer.write("Axe, Bad Axe, 1.0, bad, 10\n"); // Bad price format
         }
 
         dbManager.importAmmunitionFromFile(tempAmmoFile.getAbsolutePath());
@@ -109,5 +109,21 @@ class DatabaseManagerTest {
         assertDoesNotThrow(() -> {
             dbManager.importAmmunitionFromFile(dirAsFile.getAbsolutePath());
         });
+    }
+
+    @Test
+    void testGetInstanceWithDifferentUrls(@TempDir Path tempDir) {
+        File dbFile1 = tempDir.resolve("db1.db").toFile();
+        File dbFile2 = tempDir.resolve("db2.db").toFile();
+        String url1 = "jdbc:sqlite:" + dbFile1.getAbsolutePath();
+        String url2 = "jdbc:sqlite:" + dbFile2.getAbsolutePath();
+
+        DatabaseManager.resetInstance();
+        DatabaseManager instance1 = DatabaseManager.getInstance(url1);
+        DatabaseManager instance2 = DatabaseManager.getInstance(url1);
+        assertSame(instance1, instance2, "Should return same instance for same URL");
+
+        DatabaseManager instance3 = DatabaseManager.getInstance(url2);
+        assertNotSame(instance1, instance3, "Should return new instance for different URL");
     }
 }

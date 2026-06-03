@@ -17,20 +17,12 @@ class LoggerServiceTest {
 
     @BeforeEach
     void setUp() {
-        
-        File file = new File(logFileName);
-        if (file.exists()) {
-            file.delete();
-        }
+        new File(logFileName).delete();
     }
 
     @AfterEach
     void tearDown() {
-        
-        File file = new File(logFileName);
-        if (file.exists()) {
-            file.delete();
-        }
+        new File(logFileName).delete();
     }
 
     @Test
@@ -64,11 +56,43 @@ class LoggerServiceTest {
     }
 
     @Test
-    void testDirectoryCreation() {
+    void testErrorWithThrowableLogging() throws Exception {
+        String testMessage = "Test ERROR with exception " + System.currentTimeMillis();
+        RuntimeException ex = new RuntimeException("Mock Cause Exception");
+        
+        LoggerService.error(testMessage, ex);
+
         File logFile = new File(logFileName);
-        if (logFile.exists()) logFile.delete();
+        assertTrue(logFile.exists(), "Log file should be created");
+
+        List<String> lines = Files.readAllLines(Paths.get(logFileName));
+        boolean foundMessage = lines.stream().anyMatch(line -> line.contains(testMessage) && line.contains("[ERROR]"));
+        boolean foundException = lines.stream().anyMatch(line -> line.contains("Mock Cause Exception"));
+        
+        assertTrue(foundMessage, "Log file should contain the ERROR message");
+        assertTrue(foundException, "Log file should contain the exception detail");
+    }
+
+    @Test
+    void testErrorWithNullThrowableLogging() throws Exception {
+        String testMessage = "Test ERROR with null exception " + System.currentTimeMillis();
+        
+        LoggerService.error(testMessage, (Throwable) null);
+
+        File logFile = new File(logFileName);
+        assertTrue(logFile.exists(), "Log file should be created");
+
+        List<String> lines = Files.readAllLines(Paths.get(logFileName));
+        boolean found = lines.stream().anyMatch(line -> line.contains(testMessage) && line.contains("[ERROR]"));
+        
+        assertTrue(found, "Log file should contain the ERROR message");
+    }
+
+    @Test
+    void testDirectoryCreation() {
+        new File(logFileName).delete();
         File dir = new File("logs");
-        if (dir.exists()) dir.delete(); 
+        dir.delete(); 
         
         LoggerService.info("Test Directory Creation");
         assertTrue(dir.exists(), "Directory should be created");
@@ -78,7 +102,7 @@ class LoggerServiceTest {
     void testIOException() throws Exception {
         File logFile = new File(logFileName);
         File dir = new File("logs");
-        if (!dir.exists()) dir.mkdirs();
+        dir.mkdirs();
         logFile.createNewFile();
         logFile.setReadOnly(); 
         

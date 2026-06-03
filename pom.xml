@@ -156,7 +156,7 @@
                 <configuration>
                     <!-- Оскільки тести лежать у src разом з кодом, вказуємо шукати тести у скомпільованих класах -->
                     <testClassesDirectory>${project.build.outputDirectory}</testClassesDirectory>
-                    <argLine>@{argLine} --module-path C:/javafx-sdk/lib --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base -XX:+EnableDynamicAgentLoading --add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+                    <argLine>@{argLine} --module-path C:/javafx-sdk/lib --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base -XX:+EnableDynamicAgentLoading --add-opens java.base/java.lang=ALL-UNNAMED -Dtest.mode=true</argLine>
                 </configuration>
             </plugin>
             <plugin>
@@ -173,6 +173,8 @@
                     <excludes>
                         <exclude>gui/**</exclude>
                         <exclude>Main.class</exclude>
+                        <exclude>**/*Test.class</exclude>
+                        <exclude>**/*Test$*.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>

@@ -130,4 +130,43 @@ class KnightRepositoryTest {
         
         assertEquals(11, loaded.getEquipment().size());
     }
+
+    @Test
+    void testSaveKnightWithNullRank() {
+        Knight k = new Knight("ArthurNoRank", "British", null);
+        repo.save(k);
+        
+        KnightRepository newRepo = new KnightRepository(dbManager);
+        newRepo.loadData();
+        Knight loaded = newRepo.findById(k.getId());
+        assertNotNull(loaded);
+        assertEquals(Rank.NOVICE, loaded.getRank(), "Should fall back to NOVICE");
+    }
+
+    @Test
+    void testLoadEquipmentForNonExistentKnight() throws Exception {
+        try (java.sql.Connection c = dbManager.getConnection();
+             java.sql.Statement s = c.createStatement()) {
+            s.execute("INSERT INTO equipment_catalog (id, type, name, weight, price, stat_value) VALUES (888, 'Sword', 'Ghost Sword', 1.0, 1.0, 1)");
+            s.execute("INSERT INTO knight_equipment (knight_id, catalog_id) VALUES (9999, 888)");
+        }
+        assertDoesNotThrow(() -> repo.loadData());
+        assertNull(repo.findById(9999));
+    }
+
+    @Test
+    void testSqlExceptions() throws Exception {
+        DatabaseManager badManager = DatabaseManager.getInstance("jdbc:sqlite:/non_existent_directory_123/test.db");
+        KnightRepository badRepo = new KnightRepository(badManager);
+
+        assertDoesNotThrow(() -> badRepo.loadData());
+        assertDoesNotThrow(() -> badRepo.saveData());
+        assertDoesNotThrow(() -> badRepo.save(new Knight("Arthur", "British", Rank.MASTER)));
+        assertDoesNotThrow(() -> badRepo.remove(1));
+    }
+
+    @Test
+    void testDefaultConstructor() {
+        assertDoesNotThrow(() -> new KnightRepository());
+    }
 }

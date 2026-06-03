@@ -92,4 +92,15 @@ class EquipmentRepositoryTest {
         assertEquals(2, items.size(), "Метод reload має перечитати БД заново");
         assertEquals("DB Sword", items.get(1).getName());
     }
+
+    @Test
+    void testDefaultConstructor() {
+        assertDoesNotThrow(() -> new EquipmentRepository());
+    }
+
+    @Test
+    void testLoadFromDatabaseSQLException() throws Exception {
+        DatabaseManager badManager = DatabaseManager.getInstance("jdbc:sqlite:/non_existent_directory_123/test.db");
+        assertDoesNotThrow(() -> new EquipmentRepository("dummy_path", badManager));
+    }
 }
